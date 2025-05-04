@@ -1,5 +1,5 @@
 //
-//  DocusealError.swift
+//  AnyCodable.swift
 //  docuseal-kit
 //
 //  Created by Stevenson Michel on 5/3/25.
