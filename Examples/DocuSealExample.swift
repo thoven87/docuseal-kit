@@ -29,7 +29,7 @@ struct DocuSealExample {
                 logger.info("ID: \(firstTemplate.id)")
                 logger.info("Name: \(firstTemplate.name)")
                 logger.info("Created at: \(firstTemplate.createdAt)")
-                
+
                 // Create a submission for this template
                 logger.info("\nCreating submission...")
                 let submissionRequest = CreateSubmissionRequest(
@@ -41,10 +41,10 @@ struct DocuSealExample {
                         )
                     ]
                 )
-                
+
                 let submitters = try await client.createSubmission(request: submissionRequest)
                 logger.info("Created submission with \(submitters.count) submitters")
-                
+
                 if let firstSubmitter = submitters.first {
                     logger.info("\nSubmitter details:")
                     logger.info("ID: \(firstSubmitter.id)")
