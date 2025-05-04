@@ -8,7 +8,8 @@
 import AsyncHTTPClient
 import Foundation
 import Logging
-import NIOCore
+import struct NIOCore.TimeAmount
+import NIOFoundationCompat
 import NIOHTTP1
 
 public struct DocuSealClient {
@@ -73,17 +74,18 @@ public struct DocuSealClient {
 
     internal func executeRequest<T: Decodable>(_ request: HTTPClientRequest) async throws -> T {
         let response = try await httpClient.execute(request, timeout: timeout)
-
+        // Try to get the expected bytes if not availbale collect upto 5mb
+        let expectedBytes = response.headers.first(name: "content-length").flatMap(Int.init) ?? 05 * 1024 * 1024
         guard (200...299).contains(response.status.code) else {
-            let body = try await response.body.collect(upTo: 1024 * 1024)  // 1MB max
+            let body = try await response.body.collect(upTo: expectedBytes)  // 1MB max
             let error = String(buffer: body)
             logger.error("API request failed with status: \(response.status.code), error: \(error)")
             throw DocuSealError.httpError(statusCode: response.status.code, message: error)
         }
 
         do {
-            let body = try await response.body.collect(upTo: 5 * 1024 * 1024)  // 5MB max
-            return try JSONDecoder.docuSealDecoder.decode(T.self, from: body)
+            let body = try await response.body.collect(upTo: expectedBytes)  // 5MB max
+            return try JSONDecoder.docuSealDecoder.decode(T.self, from: Data(buffer: body))
         } catch {
             logger.error("Failed to decode response: \(error)")
             throw DocuSealError.decodingError(message: String(describing: error))
