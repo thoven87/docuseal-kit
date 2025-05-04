@@ -85,7 +85,7 @@ public struct DocuSealClient {
 
         do {
             let body = try await response.body.collect(upTo: expectedBytes)  // 5MB max
-            return try JSONDecoder.docuSealDecoder.decode(T.self, from: Data(buffer: body))
+            return try JSONDecoder.docuSealDecoder.decode(T.self, from: Data(body.readableBytesView))
         } catch {
             logger.error("Failed to decode response: \(error)")
             throw DocuSealError.decodingError(message: String(describing: error))
