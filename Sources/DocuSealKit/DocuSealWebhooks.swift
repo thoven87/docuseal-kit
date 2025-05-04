@@ -5,11 +5,8 @@
 //  Created by Stevenson Michel on 5/3/25.
 //
 
-import AsyncHTTPClient
 import Foundation
-import Logging
-import NIOCore
-import NIOHTTP1
+import NIOFoundationCompat
 
 public enum DocuSealWebhookEventType: String, Codable {
     // Form Webhooks
@@ -386,7 +383,7 @@ public typealias DocuSealTemplateEvent = DocuSealWebhookEvent<DocuSealTemplateWe
 
 // MARK: - Webhook Handler
 
-public class DocusealWebhookHandler {
+public struct DocusealWebhookHandler {
     /// Verify if the webhook request signature is valid (verify that the request came from DocuSeal)
     public static func verifySignature(
         requestBody: Data,
@@ -397,6 +394,14 @@ public class DocusealWebhookHandler {
         // This method is prepared for future implementation
         // For now, return true but can be enhanced when DocuSeal adds signature verification
         true
+    }
+
+    /// Verify if the webhook request credentials are valid (verify that the request came from DocuSeal)
+    public static func verifyCredentials(
+        key: String,
+        value: String
+    ) -> Bool {
+        key == value
     }
 
     /// Parse the webhook event from the request body
@@ -423,7 +428,7 @@ public class DocusealWebhookHandler {
                 message: "DocusealWebhookHandler -> Invalid event type: \(eventTypeContainer.eventType)"
             )
         }
-
+        
         return (type: eventType, payload: data)
     }
 
