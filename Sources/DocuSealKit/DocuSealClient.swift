@@ -61,8 +61,8 @@ public struct DocuSealClient {
         request.headers.add(name: "User-Agent", value: userAgent)
 
         do {
-            let bodyData = try JSONEncoder.docuSealEncoder.encode(body)
-            request.body = .bytes(ByteBuffer(data: bodyData))
+            let body = try JSONEncoder.docuSealEncoder.encode(body)
+            request.body = .bytes(body)
         } catch {
             logger.error("Failed to encode request body: \(error)")
             throw DocuSealError.encodingError(message: String(describing: error))
@@ -83,7 +83,7 @@ public struct DocuSealClient {
 
         do {
             let body = try await response.body.collect(upTo: 5 * 1024 * 1024)  // 5MB max
-            return try JSONDecoder.docuSealDecoder.decode(T.self, from: Data(buffer: body))
+            return try JSONDecoder.docuSealDecoder.decode(T.self, from: body)
         } catch {
             logger.error("Failed to decode response: \(error)")
             throw DocuSealError.decodingError(message: String(describing: error))
