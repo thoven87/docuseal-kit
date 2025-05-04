@@ -1,5 +1,5 @@
 //
-//  DocuSealClient+Submissions.swift
+//  JSONCoder+Extensions.swift
 //  docuseal-kit
 //
 //  Created by Stevenson Michel on 5/3/25.
