@@ -12,6 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.25.2"),
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "5.1.2"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.6.3"),
     ],
     targets: [
@@ -19,6 +20,7 @@ let package = Package(
             name: "DocuSealKit",
             dependencies: [
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
+                .product(name: "JWTKit", package: "jwt-kit"),
                 .product(name: "Logging", package: "swift-log"),
             ]
         ),

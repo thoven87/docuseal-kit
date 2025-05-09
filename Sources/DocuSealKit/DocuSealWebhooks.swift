@@ -428,7 +428,7 @@ public struct DocusealWebhookHandler {
                 message: "DocusealWebhookHandler -> Invalid event type: \(eventTypeContainer.eventType)"
             )
         }
-        
+
         return (type: eventType, payload: data)
     }
 

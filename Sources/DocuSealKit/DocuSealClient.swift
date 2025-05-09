@@ -7,12 +7,14 @@
 
 import AsyncHTTPClient
 import Foundation
+import JWTKit
 import Logging
-import struct NIOCore.TimeAmount
 import NIOFoundationCompat
 import NIOHTTP1
 
-public struct DocuSealClient: Sendable {
+import struct NIOCore.TimeAmount
+
+public actor DocuSealClient {
     private let httpClient: HTTPClient
     private let baseURL: String
     private let apiKey: String
@@ -20,18 +22,21 @@ public struct DocuSealClient: Sendable {
     private let timeout: TimeAmount
     private let userAgent: String = "DocuSeal Swift SDK/1.0"
 
+    internal let keys: JWTKeyCollection
+
     public init(
         baseURL: String = "https://api.docuseal.com",
         apiKey: String,
         httpClient: HTTPClient = HTTPClient.shared,
         logger: Logger = Logger(label: "com.docusealkit.DocuSealClient"),
         timeout: TimeAmount = .seconds(60)
-    ) {
+    ) async {
         self.baseURL = baseURL
         self.apiKey = apiKey
         self.httpClient = httpClient
         self.logger = logger
         self.timeout = timeout
+        self.keys = await JWTKeyCollection().add(hmac: .init(from: apiKey), digestAlgorithm: .sha256)
     }
 
     // MARK: - Helper Methods

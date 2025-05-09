@@ -132,7 +132,7 @@ struct ClientConfigurationTests {
     @Test("Client uses HTTPClient.shared by default")
     func testClientUsesSharedHttpClient() async throws {
 
-        _ = DocuSealClient(apiKey: "apiKey")
+        _ = await DocuSealClient(apiKey: "apiKey")
         //let result = try await client.getTemplate(id: 960051)
 
         // TODO: need to figure out how to run integration tests on github
@@ -140,10 +140,26 @@ struct ClientConfigurationTests {
     }
 
     @Test("Client can use custom baseURL")
-    func testClientWithCustomBaseUrl() {
+    func testClientWithCustomBaseUrl() async {
         let customBaseURL = "https://custom.docuseal.com"
-        _ = DocuSealClient(baseURL: customBaseURL, apiKey: "apiKey")
+        _ = await DocuSealClient(baseURL: customBaseURL, apiKey: "apiKey")
         // TODO: need to figure out how to run integration tests on github
         #expect(true)
+    }
+
+    @Test("Generate JWT Token")
+    func testGenerateJWT() async throws {
+        let client = await DocuSealClient(apiKey: "apiKey")
+        let jwtToken = try await client.createToken(
+            .init(
+                externalID: "some-external-id",
+                userEmail: "user@example.com",
+                intergrationEmail: "saas@example.com",
+                name: "Document Processing",
+                documentURLs: ["https://www.irs.gov/pub/irs-pdf/fw9.pdf"]
+            )
+        )
+
+        #expect(jwtToken.isEmpty == false, "JWT token does not contain the expected token string")
     }
 }
