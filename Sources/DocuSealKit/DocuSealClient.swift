@@ -12,7 +12,7 @@ import struct NIOCore.TimeAmount
 import NIOFoundationCompat
 import NIOHTTP1
 
-public struct DocuSealClient {
+public struct DocuSealClient: Sendable {
     private let httpClient: HTTPClient
     private let baseURL: String
     private let apiKey: String
@@ -24,7 +24,7 @@ public struct DocuSealClient {
         baseURL: String = "https://api.docuseal.com",
         apiKey: String,
         httpClient: HTTPClient = HTTPClient.shared,
-        logger: Logger = Logger(label: "com.docuseal.kit"),
+        logger: Logger = Logger(label: "com.docusealkit.DocuSealClient"),
         timeout: TimeAmount = .seconds(60)
     ) {
         self.baseURL = baseURL
