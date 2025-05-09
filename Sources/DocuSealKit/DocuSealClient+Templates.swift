@@ -33,32 +33,28 @@ extension DocuSealClient {
 
     /// Create a template from Word DOCX
     public func createTemplateFromDocx(
-        request: CreateTemplateFromDocxRequest
-    ) async throws
-        -> Template
-    {
+        _ request: CreateTemplateFromDocxRequest
+    ) async throws -> Template {
         let httpRequest = try makeRequest(path: "/templates/docx", method: .POST, body: request)
         return try await executeRequest(httpRequest)
     }
 
     /// Create a template from HTML
     public func createTemplateFromHtml(
-        request: CreateTemplateFromHtmlRequest
-    ) async throws
-        -> Template
-    {
+        _ request: CreateTemplateFromHtmlRequest
+    ) async throws -> Template {
         let httpRequest = try makeRequest(path: "/templates/html", method: .POST, body: request)
         return try await executeRequest(httpRequest)
     }
 
     /// Create a template from existing PDF
-    public func createTemplateFromPdf(request: CreateTemplateFromPdfRequest) async throws -> Template {
+    public func createTemplateFromPdf(_ request: CreateTemplateFromPdfRequest) async throws -> Template {
         let httpRequest = try makeRequest(path: "/templates/pdf", method: .POST, body: request)
         return try await executeRequest(httpRequest)
     }
 
     /// Merge multiple templates into a new template
-    public func mergeTemplates(request: MergeTemplatesRequest) async throws -> Template {
+    public func mergeTemplates(_ request: MergeTemplatesRequest) async throws -> Template {
         let httpRequest = try makeRequest(path: "/templates/merge", method: .POST, body: request)
         return try await executeRequest(httpRequest)
     }
@@ -86,9 +82,7 @@ extension DocuSealClient {
     public func updateTemplate(
         id: Int,
         request: UpdateTemplateRequest
-    ) async throws
-        -> UpdatedTemplateResponse
-    {
+    ) async throws -> UpdatedTemplateResponse {
         let httpRequest = try makeRequest(path: "/templates/\(id)", method: .PUT, body: request)
         return try await executeRequest(httpRequest)
     }
@@ -97,9 +91,7 @@ extension DocuSealClient {
     public func updateTemplateDocuments(
         id: Int,
         request: UpdateTemplateDocumentsRequest
-    ) async throws
-        -> Template
-    {
+    ) async throws -> Template {
         let httpRequest = try makeRequest(
             path: "/templates/\(id)/documents",
             method: .PUT,
