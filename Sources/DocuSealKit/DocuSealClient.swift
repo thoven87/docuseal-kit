@@ -14,7 +14,7 @@ import NIOHTTP1
 
 import struct NIOCore.TimeAmount
 
-public actor DocuSealClient {
+public struct DocuSealClient: Sendable {
     private let httpClient: HTTPClient
     private let baseURL: String
     private let apiKey: String
