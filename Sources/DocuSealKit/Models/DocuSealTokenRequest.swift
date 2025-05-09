@@ -8,35 +8,64 @@
 import JWTKit
 
 public struct DocuSealTokenRequest: JWTPayload {
-    /// User requesting to sign a document
+    /// Email address of the DocuSeal admin user that provided the API_KEY for JWT signing.
     let userEmail: String
 
-    /// Integration Email
+    /// Email address of your SaaS user that opens the document form builder.
     let intergrationEmail: String
 
-    /// Request name
+    /// New template name when creating a template with document_urls specified.
     let name: String
 
-    /// Documents
+    /// An array with public and downloadable document URLs to be opened in the form builder.
+    /// Pass empty array to allow users to upload their files.
     let documentURLs: [String]
 
-    /// External file or request id
+    /// Unique string to tag the opened document within the DocuSeal platform and to be able to reopen the form using this unique key.
     let externalID: String
+    
+    /// ID of the existing template to open in the form builder - leave empty if `documents_urls[]` is specified.
+    /// Templates can be created via the HTML API or PDF export API.
+    var templateID: Int?
 
+    /// The folder name in which the template should be created.
+    var folderName: String
+
+    /// Pass `false` to disable automatic PDF form fields extraction.
+    /// PDF fields are automatically added by default.
+    var extractFields: Bool?
+    
+    /// DocuSealTokenRequest Instance
+    /// - Parameters:
+    ///   - externalID: Unique string to tag the opened document within the DocuSeal platform and to be able to reopen the form using this unique key.
+    ///   - userEmail: Email address of the DocuSeal admin user that provided the API_KEY for JWT signing.
+    ///   - intergrationEmail: Email address of your SaaS user that opens the document form builder.
+    ///   - templateName: New template name when creating a template with document_urls specified.
+    ///   - documentURLs: An array with public and downloadable document URLs to be opened in the form builder. Pass empty array to allow users to upload their files.
+    ///   - templateID: ID of the existing template to open in the form builder - leave empty if `documents_urls[]` is specified. Templates can be created via the HTML API or PDF export API.
+    ///   - folderName: The folder name in which the template should be created.
+    ///   - extractFields: Pass `false` to disable automatic PDF form fields extraction. PDF fields are automatically added by default.
     public init(
         externalID: String,
         userEmail: String,
         intergrationEmail: String,
-        name: String,
-        documentURLs: [String]
+        templateName: String,
+        documentURLs: [String],
+        templateID: Int? = nil,
+        folderName: String = "",
+        extractFields: Bool? = nil
     ) {
         self.externalID = externalID
         self.userEmail = userEmail
         self.intergrationEmail = intergrationEmail
-        self.name = name
+        self.name = templateName
         self.documentURLs = documentURLs
+        self.templateID = templateID
+        self.folderName = folderName
+        self.extractFields = extractFields
     }
 
+    /// NOOP
     public func verify(using algorithm: some JWTKit.JWTAlgorithm) async throws {
         // no verifiable claims
     }
@@ -47,5 +76,8 @@ public struct DocuSealTokenRequest: JWTPayload {
         case intergrationEmail = "integration_email"
         case name
         case documentURLs = "document_urls"
+        case templateID = "template_id"
+        case folderName = "folder_name"
+        case extractFields = "extract_fields"
     }
 }
