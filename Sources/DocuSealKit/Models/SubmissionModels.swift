@@ -246,10 +246,10 @@ public struct SubmissionSubmitter: Codable {
     public let role: String?
     public let email: String
     public let phone: String?
-    public let values: [String: AnyCodable]?
+    public let values: [FieldValue]?
     public let externalId: String?
     public let completed: Bool?
-    public let metadata: [String: AnyCodable]?
+    public let metadata: [String: String]?
     public let sendEmail: Bool?
     public let sendSms: Bool?
     public let replyTo: String?
@@ -263,10 +263,10 @@ public struct SubmissionSubmitter: Codable {
         role: String? = nil,
         email: String,
         phone: String? = nil,
-        values: [String: AnyCodable]? = nil,
+        values: [FieldValue]? = nil,
         externalId: String? = nil,
         completed: Bool? = nil,
-        metadata: [String: AnyCodable]? = nil,
+        metadata: [String: String]? = nil,
         sendEmail: Bool? = nil,
         sendSms: Bool? = nil,
         replyTo: String? = nil,
@@ -311,9 +311,9 @@ public struct SubmissionSubmitter: Codable {
     }
 }
 
-public struct SubmissionField: Codable {
+public struct SubmissionField: Codable, Sendable {
     public let name: String
-    public let defaultValue: AnyCodable?
+    public let defaultValue: [String: String]
     public let readonly: Bool?
     public let required: Bool?
     public let title: String?
@@ -324,7 +324,7 @@ public struct SubmissionField: Codable {
 
     public init(
         name: String,
-        defaultValue: AnyCodable? = nil,
+        defaultValue: [String: String],
         readonly: Bool? = nil,
         required: Bool? = nil,
         title: String? = nil,
@@ -357,7 +357,7 @@ public struct SubmissionField: Codable {
     }
 }
 
-public struct FieldPreferences: Codable {
+public struct FieldPreferences: Codable, Sendable {
     public let fontSize: Int?
     public let fontType: String?
     public let font: String?

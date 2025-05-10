@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Common Models
 
-public struct Document: Codable {
+public struct Document: Codable, Sendable {
     public let name: String
     public let url: String
 
@@ -19,7 +19,7 @@ public struct Document: Codable {
     }
 }
 
-public struct FieldValue: Codable {
+public struct FieldValue: Codable, Sendable {
     public let field: String
     public let value: String
 
@@ -29,7 +29,7 @@ public struct FieldValue: Codable {
     }
 }
 
-public struct Pagination: Codable {
+public struct Pagination: Codable, Sendable {
     public let count: Int
     public let next: Int?
     public let prev: Int?
@@ -41,7 +41,7 @@ public struct Pagination: Codable {
     }
 }
 
-public struct TemplateReference: Codable {
+public struct TemplateReference: Codable, Sendable {
     public let id: Int
     public let name: String
     public let externalId: String?
@@ -75,13 +75,13 @@ public struct TemplateReference: Codable {
     }
 }
 
-public struct UserReference: Codable {
-    public let id: Int
-    public let firstName: String
-    public let lastName: String
-    public let email: String
+public struct UserReference: Codable, Sendable {
+    public let id: Int?
+    public let firstName: String?
+    public let lastName: String?
+    public let email: String?
 
-    public init(id: Int, firstName: String, lastName: String, email: String) {
+    public init(id: Int?, firstName: String?, lastName: String?, email: String?) {
         self.id = id
         self.firstName = firstName
         self.lastName = lastName
@@ -96,7 +96,7 @@ public struct UserReference: Codable {
     }
 }
 
-public struct EventRecord: Codable {
+public struct EventRecord: Codable, Sendable {
     public let id: Int
     public let submitterId: Int
     public let eventType: String
@@ -119,7 +119,7 @@ public struct EventRecord: Codable {
 
 // MARK: - Archive Response
 
-public struct ArchiveResponse: Codable {
+public struct ArchiveResponse: Codable, Sendable {
     public let id: Int
     public let archivedAt: Date
 
@@ -136,11 +136,11 @@ public struct ArchiveResponse: Codable {
 
 // MARK: - Template Models
 
-public struct Template: Codable {
+public struct Template: Codable, Sendable {
     public let id: Int
     public let slug: String
     public let name: String
-    public let preferences: [String: AnyCodable]?
+    public let preferences: TemplatePreferences?
     public let schema: [TemplateSchema]
     public let fields: [TemplateField]
     public let submitters: [TemplateSubmitter]
@@ -152,14 +152,14 @@ public struct Template: Codable {
     public let folderId: Int?
     public let folderName: String?
     public let externalId: String?
-    public let author: UserReference
+    public let author: UserReference?
     public let documents: [TemplateDocument]
 
     public init(
         id: Int,
         slug: String,
         name: String,
-        preferences: [String: AnyCodable]?,
+        preferences: TemplatePreferences?,
         schema: [TemplateSchema],
         fields: [TemplateField],
         submitters: [TemplateSubmitter],
@@ -171,7 +171,7 @@ public struct Template: Codable {
         folderId: Int?,
         folderName: String?,
         externalId: String?,
-        author: UserReference,
+        author: UserReference?,
         documents: [TemplateDocument]
     ) {
         self.id = id
@@ -214,7 +214,7 @@ public struct Template: Codable {
     }
 }
 
-public struct TemplateSchema: Codable {
+public struct TemplateSchema: Codable, Sendable {
     public let attachmentUuid: String
     public let name: String
 
@@ -229,13 +229,13 @@ public struct TemplateSchema: Codable {
     }
 }
 
-public struct TemplateField: Codable {
+public struct TemplateField: Codable, Sendable {
     public let uuid: String
     public let submitterUuid: String
     public let name: String
     public let type: String
     public let required: Bool
-    public let preferences: [String: AnyCodable]?
+    public let preferences: [String: String]?
     public let areas: [FieldArea]
 
     public init(
@@ -244,7 +244,7 @@ public struct TemplateField: Codable {
         name: String,
         type: String,
         required: Bool,
-        preferences: [String: AnyCodable]?,
+        preferences: [String: String]?,
         areas: [FieldArea]
     ) {
         self.uuid = uuid
@@ -267,7 +267,7 @@ public struct TemplateField: Codable {
     }
 }
 
-public struct FieldArea: Codable {
+public struct FieldArea: Codable, Sendable {
     public let x: Double
     public let y: Double
     public let w: Double
@@ -291,7 +291,7 @@ public struct FieldArea: Codable {
     }
 }
 
-public struct TemplateSubmitter: Codable {
+public struct TemplateSubmitter: Codable, Sendable {
     public let name: String
     public let uuid: String
 
@@ -301,7 +301,7 @@ public struct TemplateSubmitter: Codable {
     }
 }
 
-public struct TemplateDocument: Codable {
+public struct TemplateDocument: Codable, Sendable {
     public let id: Int
     public let uuid: String
     public let url: String
@@ -327,7 +327,7 @@ public struct TemplateDocument: Codable {
 
 // MARK: - Template List Response
 
-public struct TemplateListResponse: Codable {
+public struct TemplateListResponse: Codable, Sendable {
     public let data: [Template]
     public let pagination: Pagination
 
@@ -339,7 +339,7 @@ public struct TemplateListResponse: Codable {
 
 // MARK: - Template List Query
 
-public struct TemplateListQuery: Codable {
+public struct TemplateListQuery: Codable, Sendable {
     public let q: String?
     public let slug: String?
     public let externalId: String?

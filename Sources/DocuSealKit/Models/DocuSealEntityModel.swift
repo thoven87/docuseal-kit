@@ -17,12 +17,22 @@ public struct DocuSealSubmitterEntityModel: Codable, Sendable {
     public var email: String?
     /// Phone number of the enity
     public var phone: String?
-    
+    /// Metadata which can include application metadata
+    /// e.g ["tenant_id": "383893", "source": "portal"]
+    public var metadata: [String: String]?
+
     /// Init
-    public init(name: String, role: String, email: String? = nil, phone: String? = nil) {
+    public init(
+        name: String,
+        role: String,
+        email: String? = nil,
+        phone: String? = nil,
+        metadata: [String: String]? = nil
+    ) {
         self.name = name
         self.role = role
         self.email = email
         self.phone = phone
+        self.metadata = metadata
     }
 }

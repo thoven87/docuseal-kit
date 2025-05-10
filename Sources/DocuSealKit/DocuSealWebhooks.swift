@@ -69,9 +69,9 @@ public struct DocuSealFormWebhookData: Codable {
     public let updatedAt: Date
     public let submission: DocuSealFormSubmissionInfo?
     public let template: TemplateReference?
-    public let preferences: [String: AnyCodable]?
+    public let preferences: [String: String]?
     public let values: [FieldValue]?
-    public let metadata: [String: AnyCodable]?
+    public let metadata: [String: String]?
     public let auditLogUrl: String?
     public let submissionUrl: String?
     public let documents: [Document]?
@@ -97,9 +97,9 @@ public struct DocuSealFormWebhookData: Codable {
         updatedAt: Date,
         submission: DocuSealFormSubmissionInfo?,
         template: TemplateReference?,
-        preferences: [String: AnyCodable]?,
+        preferences: [String: String]?,
         values: [FieldValue]?,
-        metadata: [String: AnyCodable]?,
+        metadata: [String: String]?,
         auditLogUrl: String?,
         submissionUrl: String?,
         documents: [Document]?
@@ -302,7 +302,7 @@ public struct DocuSealTemplateWebhookData: Codable {
     public let source: String
     public let folderId: Int?
     public let externalId: String?
-    public let preferences: [String: AnyCodable]?
+    public let preferences: [String: String]?
     public let applicationKey: String?
     public let folderName: String?
     public let author: UserReference
@@ -323,7 +323,7 @@ public struct DocuSealTemplateWebhookData: Codable {
         source: String,
         folderId: Int?,
         externalId: String?,
-        preferences: [String: AnyCodable]?,
+        preferences: [String: String]?,
         applicationKey: String?,
         folderName: String?,
         author: UserReference,
