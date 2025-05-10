@@ -17,4 +17,12 @@ public struct DocuSealSubmitterEntityModel: Codable, Sendable {
     public var email: String?
     /// Phone number of the enity
     public var phone: String?
+    
+    /// Init
+    public init(name: String, role: String, email: String? = nil, phone: String? = nil) {
+        self.name = name
+        self.role = role
+        self.email = email
+        self.phone = phone
+    }
 }
