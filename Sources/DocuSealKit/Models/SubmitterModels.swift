@@ -7,9 +7,30 @@
 
 import Foundation
 
+//in DocuSeal, submitter preferences are configuration options that control how submitters interact with documents. These preferences can be set when creating or updating submissions.
+//
+//For submitters, the preferences can include:
+//
+//send_email: Boolean that determines whether to send an email invitation to the submitter
+//send_sms: Boolean that determines whether to send an SMS invitation to the submitter
+//email_message_uuid: String identifier for a specific email message template
+//When working with embedded forms, you can set preferences for submitters. For example:
+
+public struct SubmitterPreferences: Codable, Sendable {
+    public let sendEmail: Bool
+    public let sendSms: Bool
+    public let emailMessageUuid: String?
+
+    enum CodingKeys: String, CodingKey {
+        case sendEmail = "send_email"
+        case sendSms = "send_sms"
+        case emailMessageUuid = "email_message_uuid"
+    }
+}
+
 // MARK: - Submitter Models
 
-public struct Submitter: Codable {
+public struct Submitter: Codable, Sendable {
     public let id: Int
     public let submissionId: Int
     public let uuid: String
@@ -24,10 +45,13 @@ public struct Submitter: Codable {
     public let name: String?
     public let phone: String?
     public let externalId: String?
-    public let metadata: [String: AnyCodable]?
+    //    The metadata field allows you to store arbitrary JSON data that you can later use to identify or categorize submissions. For example, you might use it to store your own database IDs, reference numbers, or other system-specific information.
+    //
+    //    When creating a submission via API, you can include metadata like this:
+    public let metadata: [String: String]?
     public let status: String
     public let values: [FieldValue]?
-    public let preferences: [String: AnyCodable]?
+    public let preferences: SubmitterPreferences?
     public let role: String
     public let embedSrc: String?
     public let documents: [Document]?
@@ -49,10 +73,10 @@ public struct Submitter: Codable {
         name: String?,
         phone: String?,
         externalId: String?,
-        metadata: [String: AnyCodable]?,
+        metadata: [String: String]?,
         status: String,
         values: [FieldValue]?,
-        preferences: [String: AnyCodable]?,
+        preferences: SubmitterPreferences,
         role: String,
         embedSrc: String?,
         documents: [Document]?,
@@ -201,14 +225,14 @@ public struct UpdateSubmitterRequest: Codable {
     public let name: String?
     public let email: String?
     public let phone: String?
-    public let values: [String: AnyCodable]?
+    public let values: [FieldValue]?
     public let externalId: String?
     public let sendEmail: Bool?
     public let sendSms: Bool?
     public let replyTo: String?
     public let completedRedirectUrl: String?
     public let completed: Bool?
-    public let metadata: [String: AnyCodable]?
+    public let metadata: [String: String]?
     public let message: SubmissionMessage?
     public let fields: [SubmissionField]?
 
@@ -216,14 +240,14 @@ public struct UpdateSubmitterRequest: Codable {
         name: String? = nil,
         email: String? = nil,
         phone: String? = nil,
-        values: [String: AnyCodable]? = nil,
+        values: [FieldValue]? = nil,
         externalId: String? = nil,
         sendEmail: Bool? = nil,
         sendSms: Bool? = nil,
         replyTo: String? = nil,
         completedRedirectUrl: String? = nil,
         completed: Bool? = nil,
-        metadata: [String: AnyCodable]? = nil,
+        metadata: [String: String]? = nil,
         message: SubmissionMessage? = nil,
         fields: [SubmissionField]? = nil
     ) {

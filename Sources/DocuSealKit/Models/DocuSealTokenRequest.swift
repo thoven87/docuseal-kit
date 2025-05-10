@@ -23,7 +23,7 @@ public struct DocuSealTokenRequest: JWTPayload {
 
     /// Unique string to tag the opened document within the DocuSeal platform and to be able to reopen the form using this unique key.
     let externalID: String
-    
+
     /// ID of the existing template to open in the form builder - leave empty if `documents_urls[]` is specified.
     /// Templates can be created via the HTML API or PDF export API.
     var templateID: Int?
@@ -34,7 +34,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     /// Pass `false` to disable automatic PDF form fields extraction.
     /// PDF fields are automatically added by default.
     var extractFields: Bool?
-    
+
     /// DocuSealTokenRequest Instance
     /// - Parameters:
     ///   - externalID: Unique string to tag the opened document within the DocuSeal platform and to be able to reopen the form using this unique key.
