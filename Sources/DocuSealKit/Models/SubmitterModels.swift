@@ -17,45 +17,83 @@ import Foundation
 //When working with embedded forms, you can set preferences for submitters. For example:
 
 public struct SubmitterPreferences: Codable, Sendable {
+    /// Should send email
     public let sendEmail: Bool
-    public let sendSms: Bool
+    /// Should send SMS
+    public let sendSMS: Bool
+    /// The message UUID
     public let emailMessageUuid: String?
 
     enum CodingKeys: String, CodingKey {
         case sendEmail = "send_email"
-        case sendSms = "send_sms"
+        case sendSMS = "send_sms"
         case emailMessageUuid = "email_message_uuid"
     }
 }
 
 // MARK: - Submitter Models
 
+// The status of the submission.
+public enum DocuSealSubmissionStatus: String, Codable, Sendable {
+    case awaiting
+    case completed
+    case declined
+    case failed
+    case opened
+    case sent
+}
+
 public struct Submitter: Codable, Sendable {
+    /// The submitter's unique identifier.
     public let id: Int
+    /// The unique submission identifier.
     public let submissionId: Int
+    /// The submitter UUID.
     public let uuid: String
+    /// The email address of the submitter.
+    /// Example: john.doe@example.com
     public let email: String
+    /// The unique slug of the document template.
     public let slug: String
+    /// The date and time when the signing request was sent to the submitter.
     public let sentAt: Date?
+    /// The date and time when the submitter opened the signing form.
     public let openedAt: Date?
+    /// The date and time when the submitter completed the signing form.
     public let completedAt: Date?
+    /// The date and time when the submitter declined the signing form.
     public let declinedAt: Date?
+    /// The date and time when the submitter was created.
     public let createdAt: Date
+    /// The date and time when the submitter was last updated.
     public let updatedAt: Date
+    /// The name of the submitter.
     public let name: String?
+    /// The phone number of the submitter, formatted according to the E.164 standard.
+    /// Example: +1234567890
     public let phone: String?
+    /// Your application-specific unique string key to identify this submitter within your app.
     public let externalId: String?
-    //    The metadata field allows you to store arbitrary JSON data that you can later use to identify or categorize submissions. For example, you might use it to store your own database IDs, reference numbers, or other system-specific information.
-    //
-    //    When creating a submission via API, you can include metadata like this:
+    /// Metadata object with additional submitter information.
+    /// Example: [ "customField": "value'" ]
     public let metadata: [String: String]?
-    public let status: String
+    /// The submitter status.
+    /// Possible values: completed, declined, opened, sent, awaiting
+    public let status: DocuSealSubmissionStatus
+    /// An object with pre-filled values for the submission. Use field names for keys of the object. For more configurations see `fields` param.
     public let values: [FieldValue]?
+    /// The submitter preferences.
     public let preferences: SubmitterPreferences?
+    /// The role name or title of the submitter.
+    /// Example: First Party
     public let role: String
+    /// Embed source
     public let embedSrc: String?
+    /// The list of documents for the submission.
     public let documents: [Document]?
+    /// Base template details.
     public let template: TemplateReference?
+    ///
     public let eventRecords: [EventRecord]?
 
     public init(
@@ -74,7 +112,7 @@ public struct Submitter: Codable, Sendable {
         phone: String?,
         externalId: String?,
         metadata: [String: String]?,
-        status: String,
+        status: DocuSealSubmissionStatus,
         values: [FieldValue]?,
         preferences: SubmitterPreferences,
         role: String,
@@ -150,14 +188,26 @@ public struct SubmitterListResponse: Codable {
 // MARK: - Submitter List Query
 
 public struct SubmitterListQuery: Codable {
+    /// The submission ID allows you to receive only the submitters related to that specific submission.
     public let submissionId: Int?
+    /// Filter submitters on name, email or phone partial match.
     public let q: String?
+    /// Filter submissions by unique slug.
+    /// Example: NtLDQM7eJX2ZMd
     public let slug: String?
+    /// The date and time string value to filter submitters that completed the submission after the specified date and time.
+    /// Example: 2024-03-05 9:32:20
     public let completedAfter: String?
+    /// The date and time string value to filter submitters that completed the submission before the specified date and time.
+    /// Example: 2024-03-06 19:32:20
     public let completedBefore: String?
+    /// The template ID allows you to receive only the submissions created from that specific template.
     public let externalId: String?
+    /// The number of submissions to return. Default value is 10. Maximum value is 100.
     public let limit: Int?
+    /// The unique identifier of the submitter to start the list from. It allows you to receive only submitters with id greater than the specified value. Pass ID value from the `pagination.next` response to load the next batch of submitters.
     public let after: Int?
+    /// The unique identifier of the submitter to end the list with. It allows you to receive only submitters with id less than the specified value.
     public let before: Int?
 
     public init(
@@ -200,6 +250,7 @@ public struct SubmitterListQuery: Codable {
         if let submissionId = submissionId {
             items.append(URLQueryItem(name: "submission_id", value: String(submissionId)))
         }
+
         if let q = q { items.append(URLQueryItem(name: "q", value: q)) }
         if let slug = slug { items.append(URLQueryItem(name: "slug", value: slug)) }
         if let completedAfter = completedAfter {
@@ -222,18 +273,35 @@ public struct SubmitterListQuery: Codable {
 // MARK: - Update Submitter Request
 
 public struct UpdateSubmitterRequest: Codable {
+    /// The name of the submitter.
     public let name: String?
+    /// The email address of the submitter.
+    /// Example: john.doe@example.com
     public let email: String?
+    /// The phone number of the submitter, formatted according to the E.164 standard.
+    /// Example: +1234567890
     public let phone: String?
+    /// FieldValue with pre-filled values for the submission. Use field names for keys of the object. For more configurations see `fields` param.
     public let values: [FieldValue]?
+    /// Your application-specific unique string key to identify this submitter within your app.
     public let externalId: String?
+    /// Set `true` to re-send signature request emails.
     public let sendEmail: Bool?
-    public let sendSms: Bool?
+    /// Set `true` to re-send signature request via phone number SMS.
+    /// Default: false
+    public let sendSms: Bool
+    /// Specify Reply-To address to use in the notification emails.
     public let replyTo: String?
+    /// Submitter specific URL to redirect to after the submission completion.
     public let completedRedirectUrl: String?
+    /// Pass `true` to mark submitter as completed and auto-signed via API.
     public let completed: Bool?
+    /// Metadata dictionary with additional submitter information.
+    /// Example:  [ "customField": "value" ]
     public let metadata: [String: String]?
+    /// Submitter Message
     public let message: SubmissionMessage?
+    /// A list of configurations for template document form fields.
     public let fields: [SubmissionField]?
 
     public init(
@@ -243,7 +311,7 @@ public struct UpdateSubmitterRequest: Codable {
         values: [FieldValue]? = nil,
         externalId: String? = nil,
         sendEmail: Bool? = nil,
-        sendSms: Bool? = nil,
+        sendSms: Bool = false,
         replyTo: String? = nil,
         completedRedirectUrl: String? = nil,
         completed: Bool? = nil,

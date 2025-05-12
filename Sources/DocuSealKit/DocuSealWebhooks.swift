@@ -26,22 +26,16 @@ public enum DocuSealWebhookEventType: String, Codable {
     case templateUpdated = "template.updated"
 }
 
-// The status of the submission.
-public enum DocuSealSubmissionStatus: String, Codable {
-    case awaiting
-    case completed
-    case declined
-    case failed
-    case opened
-    case sent
-}
-
 // MARK: - Base Webhook Event
 
 public struct DocuSealWebhookEvent<T: Codable>: Codable {
-    /// 
+    /// The event type.
+    /// Possible values: form.viewed, form.started, form.completed
     public let eventType: DocuSealWebhookEventType
+    /// The event timestamp.
+    /// Example: 2023-09-24T11:20:42Z
     public let timestamp: Date
+    /// Submitted data object.
     public let data: T
 
     public init(eventType: DocuSealWebhookEventType, timestamp: Date, data: T) {
@@ -60,37 +54,66 @@ public struct DocuSealWebhookEvent<T: Codable>: Codable {
 // MARK: - Form Webhook Data
 
 public struct DocuSealFormWebhookData: Codable {
+    /// The submitter's unique identifier.
     public let id: Int
+    /// The unique submission identifier.
     public let submissionId: Int
+    /// The submitter's email address
+    /// Example: john.doe@example.com
     public let email: String?
+    /// The user agent string that provides information about the submitter's web browser.
+    /// Example: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36
     public let ua: String?
+    /// The submitter's IP address.
     public let ip: String?
+    /// The submitter's name.
     public let name: String?
+    /// The submitter's phone number, formatted according to the E.164 standard.
+    /// Example: +1234567890
     public let phone: String?
+    /// The submitter's role name or title.
+    /// Example: First Party
     public let role: String?
+    /// Your application-specific unique string key to identify submitter within your app.
     public let externalId: String?
+    /// Your application-specific unique string key to identify submitter within your app. Backward compatibility with the previous version of the API. Use external_id instead.
+    @available(*, deprecated, renamed: "externalId")
     public let applicationKey: String?
+    /// Submitter provided decline message.
     public let declineReason: String?
+    /// Sent At
     public let sentAt: Date?
+    /// The submitter status.
+    /// Possible values: completed, declined, opened, sent, awaiting
     public let status: DocuSealSubmissionStatus
     public let openedAt: Date?
     public let completedAt: Date?
     public let declinedAt: Date?
     public let createdAt: Date
     public let updatedAt: Date
+    /// The submission details.
     public let submission: DocuSealFormSubmissionInfo?
+    /// Base template details.
     public let template: TemplateReference?
+    /// Preferences
     public let preferences: Preferences?
+    /// List of the filled values passed by the submitter.
     public let values: [FieldValue]?
+    /// Metadata dictionary with additional submitter information.
     public let metadata: [String: String]?
+    /// The audit log PDF URL. Available only if the submission was completed by all submitters.
     public let auditLogUrl: String?
+    /// The submission URL.
     public let submissionUrl: String?
+    /// Documents
     public let documents: [Document]?
-    
+
     public struct Preferences: Codable {
+        /// The flag indicating whether the submitter has opted to receive an email.
         public let sendEmail: Bool
+        /// The flag indicating whether the submitter has opted to receive an SMS.
         public let sendSms: Bool
-        
+
         enum CodingKeys: String, CodingKey {
             case sendEmail = "send_email"
             case sendSms = "send_sms"
@@ -184,11 +207,18 @@ public struct DocuSealFormWebhookData: Codable {
 }
 
 public struct DocuSealFormSubmissionInfo: Codable {
+    /// The submission's unique identifier.
     public let id: Int
+    /// The audit log PDF URL. Available only if the submission was completed by all submitters.
     public let auditLogUrl: String?
+    /// The URL of the combined documents with audit log. Combined documents can be enabled via /settings/accounts.
     public let combinedDocumentUrl: String?
+    /// The submission status.
+    /// Possible values: completed, declined, expired, pending
     public let status: DocuSealSubmissionStatus
+    /// The submission URL.
     public let url: String?
+    /// The submission creation date.
     public let createdAt: Date
 
     public init(
@@ -218,15 +248,29 @@ public struct DocuSealFormSubmissionInfo: Codable {
 }
 
 // MARK: - Submission Webhook Data
-
+//Get submission creation, completion, expiration, and archiving notifications using these events:
+//'submission.created' event is triggered when the submission is created.
+//'submission.completed' event is triggered when the submission is completed by all signing parties.
+//'submission.expired' event is triggered when the submission expires.
+//'submission.archived' event is triggered when the submission is archived.
 public struct DocuSealSubmissionWebhookData: Codable {
+    /// The submission's unique identifier.
     public let id: Int
+    /// The submission archive date.
     public let archivedAt: Date?
+    /// The submission creation date.
     public let createdAt: Date
+    /// The submission update date.
     public let updatedAt: Date
-    public let source: String
-    public let submittersOrder: String
+    /// The submission source.
+    /// Possible values: invite, bulk, api, embed, link
+    public let source: Source
+    /// The submitters order.
+    /// Possible values: random, preserved
+    public let submittersOrder: SubmittersOrder
+    /// Audit log file URL.
     public let auditLogUrl: String?
+    /// The list of submitters for the submission.
     public let submitters: [Submitter]
     public let template: TemplateReference?
     public let createdByUser: UserReference?
@@ -235,13 +279,21 @@ public struct DocuSealSubmissionWebhookData: Codable {
     public let status: DocuSealSubmissionStatus
     public let completedAt: Date?
 
+    public enum Source: String, Codable {
+        case invite = "invite"
+        case bulk = "bulk"
+        case api = "api"
+        case embed = "embed"
+        case link = "link"
+    }
+
     public init(
         id: Int,
         archivedAt: Date?,
         createdAt: Date,
         updatedAt: Date,
-        source: String,
-        submittersOrder: String,
+        source: Source,
+        submittersOrder: SubmittersOrder,
         auditLogUrl: String?,
         submitters: [Submitter],
         template: TemplateReference?,
@@ -361,7 +413,7 @@ public struct DocuSealTemplateWebhookData: Codable {
     /// Identifier of the template in the external system.
     public let externalId: String?
     /// The field preferences.
-    public let preferences: TemplatePreferences?
+    public let preferences: FieldPreferences?
     /// Your application-specific unique string key to identify tempate_id within your app.
     public let applicationKey: String?
     /// Folder name where the template is placed.
@@ -393,7 +445,7 @@ public struct DocuSealTemplateWebhookData: Codable {
         source: Source,
         folderId: Int?,
         externalId: String?,
-        preferences: TemplatePreferences?,
+        preferences: FieldPreferences?,
         applicationKey: String?,
         folderName: String?,
         author: UserReference,

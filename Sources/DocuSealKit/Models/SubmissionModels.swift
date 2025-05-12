@@ -111,20 +111,37 @@ public struct SubmissionListResponse: Codable {
 
 // MARK: - Submission List Query
 
+public enum SubmissionStatus: String, Codable {
+    case pending
+    case completed
+    case declined
+    case expired
+}
 public struct SubmissionListQuery: Codable {
+    /// The template ID allows you to receive only the submissions created from that specific template.
     public let templateId: Int?
-    public let status: String?
+    /// Filter submissions by status.
+    /// Possible values: pending, completed, declined, expired
+    public let status: SubmissionStatus?
+    /// Filter submissions based on submitters name, email or phone partial match.
     public let q: String?
+    /// Filter submissions by unique slug.
+    /// Example: NtLDQM7eJX2ZMd
     public let slug: String?
+    /// Filter submissions by template folder name.
     public let templateFolder: String?
+    /// Returns only archived submissions when `true` and only active submissions when `false`.
     public let archived: Bool?
+    /// The number of submissions to return. Default value is 10. Maximum value is 100.
     public let limit: Int?
+    /// The unique identifier of the submission to start the list from. It allows you to receive only submissions with an ID greater than the specified value. Pass ID value from the `pagination.next` response to load the next batch of submissions.
     public let after: Int?
+    /// The unique identifier of the submission that marks the end of the list. It allows you to receive only submissions with an ID less than the specified value.
     public let before: Int?
 
     public init(
         templateId: Int? = nil,
-        status: String? = nil,
+        status: SubmissionStatus? = nil,
         q: String? = nil,
         slug: String? = nil,
         templateFolder: String? = nil,
@@ -162,7 +179,7 @@ public struct SubmissionListQuery: Codable {
         if let templateId = templateId {
             items.append(URLQueryItem(name: "template_id", value: String(templateId)))
         }
-        if let status = status { items.append(URLQueryItem(name: "status", value: status)) }
+        if let status = status { items.append(URLQueryItem(name: "status", value: status.rawValue)) }
         if let q = q { items.append(URLQueryItem(name: "q", value: q)) }
         if let slug = slug { items.append(URLQueryItem(name: "slug", value: slug)) }
         if let templateFolder = templateFolder {
@@ -181,23 +198,44 @@ public struct SubmissionListQuery: Codable {
 
 // MARK: - Create Submission Request
 
+public enum SubmittersOrder: String, Codable {
+    case random = "random"
+    case preserved = "preserved"
+}
+
 public struct CreateSubmissionRequest: Codable {
+    /// The unique identifier of the template. Document template forms can be created via the Web UI, PDF and DOCX API, or HTML API.
+    /// Example: 1000001
     public let templateId: Int
-    public let sendEmail: Bool?
-    public let sendSms: Bool?
-    public let order: String?
+    /// Set `false` to disable signature request emails sending.
+    // Default: true
+    public let sendEmail: Bool
+    /// Set `true` to send signature request via phone number and SMS.
+    /// Default: false
+    public let sendSms: Bool
+    /// Pass 'random' to send signature request emails to all parties right away. The order is 'preserved' by default so the second party will receive a signature request email only after the document is signed by the first party.
+    /// Default: preserved
+    /// Possible values: preserved, random
+    public let order: SubmittersOrder
+    /// Specify URL to redirect to after the submission completion.
     public let completedRedirectUrl: String?
+    /// Specify BCC address to send signed documents to after the completion.
     public let bccCompleted: String?
+    /// Specify Reply-To address to use in the notification emails.
     public let replyTo: String?
+    /// Specify the expiration date and time after which the submission becomes unavailable for signature.
+    /// Example: 2024-09-01 12:00:00 UTC
     public let expireAt: String?
+    /// Submitting message
     public let message: SubmissionMessage?
+    /// The list of submitters for the submission.
     public let submitters: [SubmissionSubmitter]
 
     public init(
         templateId: Int,
-        sendEmail: Bool? = true,
-        sendSms: Bool? = nil,
-        order: String? = nil,
+        sendEmail: Bool = true,
+        sendSms: Bool = false,
+        order: SubmittersOrder = .preserved,
         completedRedirectUrl: String? = nil,
         bccCompleted: String? = nil,
         replyTo: String? = nil,
@@ -232,7 +270,9 @@ public struct CreateSubmissionRequest: Codable {
 }
 
 public struct SubmissionMessage: Codable {
+    /// Custom signature request email subject.
     public let subject: String?
+    /// Custom signature request email body. Can include the following variables: {{template.name}}, {{submitter.link}}, {{account.name}}.
     public let body: String?
 
     public init(subject: String? = nil, body: String? = nil) {
@@ -242,20 +282,41 @@ public struct SubmissionMessage: Codable {
 }
 
 public struct SubmissionSubmitter: Codable {
+    /// The name of the submitter.
     public let name: String?
+    /// The role name or title of the submitter.
+    /// Example: First Party
     public let role: String?
+    /// The email address of the submitter.
+    /// Example: john.doe@example.com
     public let email: String
+    /// The phone number of the submitter, formatted according to the E.164 standard.
+    /// Example: +1234567890
     public let phone: String?
+    /// An object with pre-filled values for the submission. Use field names for keys of the object. For more configurations see `fields` param.
     public let values: [FieldValue]?
+    /// Your application-specific unique string key to identify this submitter within your app.
     public let externalId: String?
+    /// Pass `true` to mark submitter as completed and auto-signed via API.
     public let completed: Bool?
+    /// Metadata dictionary with additional submitter information.
+    /// Example: [ "customField": "value"  ]
     public let metadata: [String: String]?
-    public let sendEmail: Bool?
-    public let sendSms: Bool?
+    /// Set `false` to disable signature request emails sending only for this submitter.
+    /// Default: true
+    public let sendEmail: Bool
+    /// Set `true` to send signature request via phone number and SMS.
+    /// Default: false
+    public let sendSms: Bool
+    /// Specify Reply-To address to use in the notification emails for this submitter.
     public let replyTo: String?
+    /// Submitter specific URL to redirect to after the submission completion.
     public let completedRedirectUrl: String?
+    /// Message to submitter
     public let message: SubmissionMessage?
+    /// A list of configurations for template document form fields.
     public let fields: [SubmissionField]?
+    /// A list of roles for the submitter. Use this param to merge multiple roles into one submitter.
     public let roles: [String]?
 
     public init(
@@ -267,8 +328,8 @@ public struct SubmissionSubmitter: Codable {
         externalId: String? = nil,
         completed: Bool? = nil,
         metadata: [String: String]? = nil,
-        sendEmail: Bool? = nil,
-        sendSms: Bool? = nil,
+        sendEmail: Bool = true,
+        sendSms: Bool = false,
         replyTo: String? = nil,
         completedRedirectUrl: String? = nil,
         message: SubmissionMessage? = nil,
@@ -312,20 +373,33 @@ public struct SubmissionSubmitter: Codable {
 }
 
 public struct SubmissionField: Codable, Sendable {
+    /// Document template field name.
+    /// Example: First Name
     public let name: String
+    /// Default value of the field. Use base64 encoded file or a public URL to the image file to set default signature or image fields.
+    // Example: Acme
     public let defaultValue: [String: String]
-    public let readonly: Bool?
+    /// Set `true` to make it impossible for the submitter to edit predefined field value.
+    /// Default: false
+    public let readonly: Bool
+    /// Set `true` to make the field required.
     public let required: Bool?
+    /// Field title displayed to the user instead of the name, shown on the signing form. Supports Markdown.
     public let title: String?
+    /// Field description displayed on the signing form. Supports Markdown.
     public let description: String?
+    /// HTML field validation pattern string based on https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern specification.
+    /// Example: [A-Z]{4}
     public let validationPattern: String?
+    /// A custom message to display on pattern validation failure.
     public let invalidMessage: String?
+    /// Field preferences
     public let preferences: FieldPreferences?
 
     public init(
         name: String,
         defaultValue: [String: String],
-        readonly: Bool? = nil,
+        readonly: Bool = false,
         required: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
@@ -357,68 +431,25 @@ public struct SubmissionField: Codable, Sendable {
     }
 }
 
-public struct FieldPreferences: Codable, Sendable {
-    public let fontSize: Int?
-    public let fontType: String?
-    public let font: String?
-    public let color: String?
-    public let align: String?
-    public let valign: String?
-    public let format: String?
-    public let price: Double?
-    public let currency: String?
-    public let mask: Bool?
-
-    public init(
-        fontSize: Int? = nil,
-        fontType: String? = nil,
-        font: String? = nil,
-        color: String? = nil,
-        align: String? = nil,
-        valign: String? = nil,
-        format: String? = nil,
-        price: Double? = nil,
-        currency: String? = nil,
-        mask: Bool? = nil
-    ) {
-        self.fontSize = fontSize
-        self.fontType = fontType
-        self.font = font
-        self.color = color
-        self.align = align
-        self.valign = valign
-        self.format = format
-        self.price = price
-        self.currency = currency
-        self.mask = mask
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case fontSize = "font_size"
-        case fontType = "font_type"
-        case font
-        case color
-        case align
-        case valign
-        case format
-        case price
-        case currency
-        case mask
-    }
-}
-
 // MARK: - Create Submissions From Emails Request
 
 public struct CreateSubmissionsFromEmailsRequest: Codable {
+    /// The unique identifier of the template.
+    /// Example: 1000001
     public let templateId: Int
+    /// A comma-separated list of email addresses to send the submission to.
+    /// Example: hi@docuseal.com, example@docuseal.com
     public let emails: String
-    public let sendEmail: Bool?
+    /// Set `false` to disable signature request emails sending.
+    /// Default: true
+    public let sendEmail: Bool
+    /// Message to include
     public let message: SubmissionMessage?
 
     public init(
         templateId: Int,
         emails: String,
-        sendEmail: Bool? = nil,
+        sendEmail: Bool = true,
         message: SubmissionMessage? = nil
     ) {
         self.templateId = templateId

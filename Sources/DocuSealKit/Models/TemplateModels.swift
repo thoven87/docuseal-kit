@@ -22,7 +22,9 @@ public struct Document: Codable, Sendable {
 }
 
 public struct FieldValue: Codable, Sendable {
+    /// The field name.
     public let field: String
+    /// The field value.
     public let value: String
 
     public init(field: String, value: String) {
@@ -44,9 +46,13 @@ public struct Pagination: Codable, Sendable {
 }
 
 public struct TemplateReference: Codable, Sendable {
+    /// The template's unique identifier.
     public let id: Int
+    /// The template's name.
     public let name: String
+    /// Your application-specific unique string key to identify template within your app.
     public let externalId: String?
+    /// Template folder name.
     public let folderName: String?
     public let createdAt: Date
     public let updatedAt: Date
@@ -146,7 +152,7 @@ public struct Template: Codable, Sendable {
     public let id: Int
     public let slug: String
     public let name: String
-    public let preferences: TemplatePreferences?
+    public let preferences: FieldPreferences?
     public let schema: [TemplateSchema]
     public let fields: [TemplateField]
     public let submitters: [TemplateSubmitter]
@@ -165,7 +171,7 @@ public struct Template: Codable, Sendable {
         id: Int,
         slug: String,
         name: String,
-        preferences: TemplatePreferences?,
+        preferences: FieldPreferences?,
         schema: [TemplateSchema],
         fields: [TemplateField],
         submitters: [TemplateSubmitter],
@@ -368,13 +374,22 @@ public struct TemplateListResponse: Codable, Sendable {
 // MARK: - Template List Query
 
 public struct TemplateListQuery: Codable, Sendable {
+    /// Filter templates based on the name partial match.
     public let q: String?
+    /// Filter templates by unique slug.
+    /// Example: opaKWh8WWTAcVG
     public let slug: String?
+    /// The unique applications-specific identifier provided for the template via API or Embedded template form builder. It allows you to receive only templates with your specified external id.
     public let externalId: String?
+    /// Filter templates by folder name.
     public let folder: String?
+    /// Get only archived templates instead of active ones.
     public let archived: Bool?
+    /// The number of templates to return. Default value is 10. Maximum value is 100.
     public let limit: Int?
+    /// The unique identifier of the template to start the list from. It allows you to receive only templates with id greater than the specified value. Pass ID value from the `pagination.next` response to load the next batch of templates.
     public let after: Int?
+    /// The unique identifier of the template to end the list with. It allows you to receive only templates with id less than the specified value.
     public let before: Int?
 
     public init(
