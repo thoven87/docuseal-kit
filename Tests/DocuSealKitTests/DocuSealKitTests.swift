@@ -155,7 +155,7 @@ struct ClientConfigurationTests {
                 externalID: "some-external-id",
                 userEmail: "user@example.com",
                 intergrationEmail: "saas@example.com",
-                name: "Document Processing",
+                templateName: "Document Processing",
                 documentURLs: ["https://www.irs.gov/pub/irs-pdf/fw9.pdf"]
             )
         )

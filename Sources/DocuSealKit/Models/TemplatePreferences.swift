@@ -24,16 +24,72 @@
 //
 //You can find more details about preferences in the API documentation at https://www.docuseal.com/docs/api.
 public struct TemplatePreferences: Codable, Sendable {
+    /// Font size of the field value in pixels.
     public let fontSize: Int?
-    public let fontType: String?
-    public let font: String?
-    public let color: String?
-    public let align: String?
-    public let valign: String?
+    /// Font type of the field value.
+    public let fontType: FontType?
+    /// Font family of the field value.
+    public let font: Font?
+    /// Font color of the field value.
+    public let color: Color?
+    /// Horizontal alignment of the field text value.
+    public let align: Align?
+    /// Vertical alignment of the field text value.
+    public let valign: VAlign?
+    /// The data format for different field types.
+    /// - Date field: accepts formats such as DD/MM/YYYY (default: MM/DD/YYYY).
+    /// - Signature field: accepts drawn, typed, drawn_or_typed (default), or upload.
+    /// - Number field: accepts currency formats such as usd, eur, gbp.
+    /// Example: DD/MM/YYYY
     public let format: String?
-    public let price: String?
-    public let currency: String?
+    /// Price value of the payment field. Only for payment fields.
+    /// Example: 99.99
+    public let price: Double?
+    /// Currency value of the payment field. Only for payment fields.
+    /// Default: USD
+    /// Possible values: USD, EUR, GBP, CAD, AUD
+    public let currency: Currency?
+    /// Set `true` to make sensitive data masked on the document.
+    /// Default: false
     public let mask: Bool?
+    
+    public enum Currency: String, Codable, Sendable {
+        case usd = "USD"
+        case eur = "EUR"
+        case gbp = "GBP"
+        case cad = "CAD"
+        case aud = "AUD"
+    }
+    
+    public enum Align: String, Codable, Sendable {
+        case left
+        case center
+        case right
+    }
+    
+    public enum VAlign: String, Codable, Sendable {
+        case top
+        case center
+        case bottom
+    }
+    
+    public enum Color: String, Codable, Sendable {
+        case black
+        case white
+        case blue
+    }
+    
+    public enum Font: String, Codable, Sendable {
+        case times = "Times"
+        case helvetica = "Helvetica"
+        case courier = "Courier"
+    }
+    
+    public enum FontType: String, Codable, Sendable {
+        case bold
+        case italic
+        case boldItalic = "bold_italic"
+    }
 
     enum CodingKeys: String, CodingKey {
         case fontSize = "font_size"

@@ -26,9 +26,20 @@ public enum DocuSealWebhookEventType: String, Codable {
     case templateUpdated = "template.updated"
 }
 
+// The status of the submission.
+public enum DocuSealSubmissionStatus: String, Codable {
+    case awaiting
+    case completed
+    case declined
+    case failed
+    case opened
+    case sent
+}
+
 // MARK: - Base Webhook Event
 
 public struct DocuSealWebhookEvent<T: Codable>: Codable {
+    /// 
     public let eventType: DocuSealWebhookEventType
     public let timestamp: Date
     public let data: T
@@ -61,7 +72,7 @@ public struct DocuSealFormWebhookData: Codable {
     public let applicationKey: String?
     public let declineReason: String?
     public let sentAt: Date?
-    public let status: String
+    public let status: DocuSealSubmissionStatus
     public let openedAt: Date?
     public let completedAt: Date?
     public let declinedAt: Date?
@@ -69,12 +80,22 @@ public struct DocuSealFormWebhookData: Codable {
     public let updatedAt: Date
     public let submission: DocuSealFormSubmissionInfo?
     public let template: TemplateReference?
-    public let preferences: [String: String]?
+    public let preferences: Preferences?
     public let values: [FieldValue]?
     public let metadata: [String: String]?
     public let auditLogUrl: String?
     public let submissionUrl: String?
     public let documents: [Document]?
+    
+    public struct Preferences: Codable {
+        public let sendEmail: Bool
+        public let sendSms: Bool
+        
+        enum CodingKeys: String, CodingKey {
+            case sendEmail = "send_email"
+            case sendSms = "send_sms"
+        }
+    }
 
     public init(
         id: Int,
@@ -89,7 +110,7 @@ public struct DocuSealFormWebhookData: Codable {
         applicationKey: String?,
         declineReason: String?,
         sentAt: Date?,
-        status: String,
+        status: DocuSealSubmissionStatus,
         openedAt: Date?,
         completedAt: Date?,
         declinedAt: Date?,
@@ -97,7 +118,7 @@ public struct DocuSealFormWebhookData: Codable {
         updatedAt: Date,
         submission: DocuSealFormSubmissionInfo?,
         template: TemplateReference?,
-        preferences: [String: String]?,
+        preferences: Preferences?,
         values: [FieldValue]?,
         metadata: [String: String]?,
         auditLogUrl: String?,
@@ -166,7 +187,7 @@ public struct DocuSealFormSubmissionInfo: Codable {
     public let id: Int
     public let auditLogUrl: String?
     public let combinedDocumentUrl: String?
-    public let status: String
+    public let status: DocuSealSubmissionStatus
     public let url: String?
     public let createdAt: Date
 
@@ -174,7 +195,7 @@ public struct DocuSealFormSubmissionInfo: Codable {
         id: Int,
         auditLogUrl: String?,
         combinedDocumentUrl: String?,
-        status: String,
+        status: DocuSealSubmissionStatus,
         url: String?,
         createdAt: Date
     ) {
@@ -211,7 +232,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
     public let createdByUser: UserReference?
     public let webhookEvents: [DocuSealWebhookSubmissionEvent]?
     public let documents: [Document]?
-    public let status: String
+    public let status: DocuSealSubmissionStatus
     public let completedAt: Date?
 
     public init(
@@ -227,7 +248,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
         createdByUser: UserReference?,
         webhookEvents: [DocuSealWebhookSubmissionEvent]?,
         documents: [Document]?,
-        status: String,
+        status: DocuSealSubmissionStatus,
         completedAt: Date?
     ) {
         self.id = id
@@ -267,10 +288,31 @@ public struct DocuSealSubmissionWebhookData: Codable {
 public struct DocuSealWebhookSubmissionEvent: Codable {
     public let id: Int
     public let submitterId: Int
-    public let eventType: String
+    public let eventType: EventType
     public let eventTimestamp: Date
 
-    public init(id: Int, submitterId: Int, eventType: String, eventTimestamp: Date) {
+    public enum EventType: String, Codable {
+        case sendEmail = "send_email"
+        case bounceEmail = "bounce_email"
+        case complaintEmail = "complaint_email"
+        case sendReminderEmail = "send_reminder_email"
+        case sendSms = "send_sms"
+        case send2faSms = "send_2fa_sms"
+        case openEmail = "open_email"
+        case clickEmail = "click_email"
+        case clickSms = "click_sms"
+        case phoneVerified = "phone_verified"
+        case startForm = "start_form"
+        case startVerification = "start_verification"
+        case completeVerification = "complete_verification"
+        case viewForm = "view_form"
+        case inviteParty = "invite_party"
+        case completeForm = "complete_form"
+        case declineForm = "decline_form"
+        case apiCompleteForm = "api_complete_form"
+    }
+
+    public init(id: Int, submitterId: Int, eventType: EventType, eventTimestamp: Date) {
         self.id = id
         self.submitterId = submitterId
         self.eventType = eventType
@@ -286,27 +328,55 @@ public struct DocuSealWebhookSubmissionEvent: Codable {
 }
 
 // MARK: - Template Webhook Data
-
+/// Get template creation and update notifications using these events:
+/// 'template.created' is triggered when the template is created.
+/// 'tempate.updated' is triggered when the template is updated.
 public struct DocuSealTemplateWebhookData: Codable {
+    /// The template's unique identifier.
     public let id: Int
+    /// The template's unique slug.
     public let slug: String
+    /// The template's name.
     public let name: String
+    /// The template document files.
     public let schema: [TemplateSchema]
+    /// The template fields.
     public let fields: [TemplateField]
+    /// The submitters.
     public let submitters: [TemplateSubmitter]
+    /// Unique identifier of the author of the template.
     public let authorId: Int
+    /// Unique identifier of the account of the template.
     public let accountId: Int?
+    /// Date and time when the template was archived.
     public let archivedAt: Date?
+    /// Date and time when the template was created.
     public let createdAt: Date
+    /// Date and time when the template was updated.
     public let updatedAt: Date
-    public let source: String
+    /// Source of the template.
+    public let source: Source
+    /// Unique identifier of the folder where the template is placed.
     public let folderId: Int?
+    /// Identifier of the template in the external system.
     public let externalId: String?
-    public let preferences: [String: String]?
+    /// The field preferences.
+    public let preferences: TemplatePreferences?
+    /// Your application-specific unique string key to identify tempate_id within your app.
     public let applicationKey: String?
+    /// Folder name where the template is placed.
     public let folderName: String?
+    /// Folder name where the template is placed.
     public let author: UserReference
+    /// List of documents attached to the template.
     public let documents: [TemplateDocument]
+
+    /// native, api, embed
+    public enum Source: String, Codable {
+        case api
+        case embed
+        case native
+    }
 
     public init(
         id: Int,
@@ -320,10 +390,10 @@ public struct DocuSealTemplateWebhookData: Codable {
         archivedAt: Date?,
         createdAt: Date,
         updatedAt: Date,
-        source: String,
+        source: Source,
         folderId: Int?,
         externalId: String?,
-        preferences: [String: String]?,
+        preferences: TemplatePreferences?,
         applicationKey: String?,
         folderName: String?,
         author: UserReference,
@@ -375,11 +445,11 @@ public struct DocuSealTemplateWebhookData: Codable {
 
 // MARK: - Typealias for Webhook Events
 
-public typealias DocuSealFormEvent = DocuSealWebhookEvent<DocuSealFormWebhookData>
+public typealias DocuSealFormWebhookEvent = DocuSealWebhookEvent<DocuSealFormWebhookData>
 public typealias DocuSealSubmissionWebhookEvent = DocuSealWebhookEvent<
     DocuSealSubmissionWebhookData
 >
-public typealias DocuSealTemplateEvent = DocuSealWebhookEvent<DocuSealTemplateWebhookData>
+public typealias DocuSealTemplateWebhookEvent = DocuSealWebhookEvent<DocuSealTemplateWebhookData>
 
 // MARK: - Webhook Handler
 
@@ -433,10 +503,10 @@ public struct DocusealWebhookHandler {
     }
 
     /// Process form webhook events
-    public static func processFormEvent(data: Data) throws -> DocuSealFormEvent {
+    public static func processFormEvent(data: Data) throws -> DocuSealFormWebhookEvent {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealFormEvent.self, from: data)
+        return try decoder.decode(DocuSealFormWebhookEvent.self, from: data)
     }
 
     /// Process submission webhook events
@@ -447,9 +517,9 @@ public struct DocusealWebhookHandler {
     }
 
     /// Process template webhook events
-    public static func processTemplateEvent(data: Data) throws -> DocuSealTemplateEvent {
+    public static func processTemplateEvent(data: Data) throws -> DocuSealTemplateWebhookEvent {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealTemplateEvent.self, from: data)
+        return try decoder.decode(DocuSealTemplateWebhookEvent.self, from: data)
     }
 }
