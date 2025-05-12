@@ -23,7 +23,7 @@
 //The `format` property is particularly useful as it allows you to specify formats for different field types, such as date formats (e.g., "DD/MM/YYYY"), signature formats (e.g., "drawn", "typed", "drawn_or_typed"), or currency formats for number fields.
 //
 //You can find more details about preferences in the API documentation at https://www.docuseal.com/docs/api.
-public struct TemplatePreferences: Codable, Sendable {
+public struct FieldPreferences: Codable, Sendable {
     /// Font size of the field value in pixels.
     public let fontSize: Int?
     /// Font type of the field value.
@@ -52,7 +52,7 @@ public struct TemplatePreferences: Codable, Sendable {
     /// Set `true` to make sensitive data masked on the document.
     /// Default: false
     public let mask: Bool?
-    
+
     public enum Currency: String, Codable, Sendable {
         case usd = "USD"
         case eur = "EUR"
@@ -60,31 +60,31 @@ public struct TemplatePreferences: Codable, Sendable {
         case cad = "CAD"
         case aud = "AUD"
     }
-    
+
     public enum Align: String, Codable, Sendable {
         case left
         case center
         case right
     }
-    
+
     public enum VAlign: String, Codable, Sendable {
         case top
         case center
         case bottom
     }
-    
+
     public enum Color: String, Codable, Sendable {
         case black
         case white
         case blue
     }
-    
+
     public enum Font: String, Codable, Sendable {
         case times = "Times"
         case helvetica = "Helvetica"
         case courier = "Courier"
     }
-    
+
     public enum FontType: String, Codable, Sendable {
         case bold
         case italic
