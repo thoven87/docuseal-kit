@@ -10,7 +10,9 @@ import Foundation
 // MARK: - Common Models
 
 public struct Document: Codable, Sendable {
+    /// Document name.
     public let name: String
+    /// Document URL.
     public let url: String
 
     public init(name: String, url: String) {
@@ -76,9 +78,13 @@ public struct TemplateReference: Codable, Sendable {
 }
 
 public struct UserReference: Codable, Sendable {
+    /// Unique identifier of the author.
     public let id: Int?
+    /// First name of the author.
     public let firstName: String?
+    /// Last name of the author.
     public let lastName: String?
+    /// Author email.
     public let email: String?
 
     public init(id: Int?, firstName: String?, lastName: String?, email: String?) {
@@ -215,7 +221,9 @@ public struct Template: Codable, Sendable {
 }
 
 public struct TemplateSchema: Codable, Sendable {
+    /// The attachment UUID.
     public let attachmentUuid: String
+    /// The attachment name.
     public let name: String
 
     public init(attachmentUuid: String, name: String) {
@@ -230,12 +238,19 @@ public struct TemplateSchema: Codable, Sendable {
 }
 
 public struct TemplateField: Codable, Sendable {
+    /// The field UUID.
     public let uuid: String
+    /// The submitter role UUID.
     public let submitterUuid: String
+    /// The field name.
     public let name: String
+    ///
     public let type: String
+    /// The flag indicating whether the field is required.
     public let required: Bool
+    /// The field preferences.
     public let preferences: [String: String]?
+    /// List of areas where the field is located in the document.
     public let areas: [FieldArea]
 
     public init(
@@ -268,11 +283,17 @@ public struct TemplateField: Codable, Sendable {
 }
 
 public struct FieldArea: Codable, Sendable {
+    /// X coordinate of the area where the field is located in the document.
     public let x: Double
+    /// Y coordinate of the area where the field is located in the document.
     public let y: Double
+    /// Width of the area where the field is located in the document.
     public let w: Double
+    /// Height of the area where the field is located in the document.
     public let h: Double
+    /// Unique identifier of the attached document where the field is located.
     public let attachmentUuid: String
+    /// Page number of the attached document where the field is located.
     public let page: Int
 
     public init(x: Double, y: Double, w: Double, h: Double, attachmentUuid: String, page: Int) {
@@ -292,7 +313,9 @@ public struct FieldArea: Codable, Sendable {
 }
 
 public struct TemplateSubmitter: Codable, Sendable {
+    /// Submitter name.
     public let name: String
+    /// Unique identifier of the submitter.
     public let uuid: String
 
     public init(name: String, uuid: String) {
@@ -302,10 +325,15 @@ public struct TemplateSubmitter: Codable, Sendable {
 }
 
 public struct TemplateDocument: Codable, Sendable {
+    /// Unique identifier of the document.
     public let id: Int
+    /// Unique identifier of the document.
     public let uuid: String
+    /// URL of the document.
     public let url: String
+    /// Document preview image URL.
     public let previewImageUrl: String?
+    /// Document filename.
     public let filename: String
 
     public init(id: Int, uuid: String, url: String, previewImageUrl: String?, filename: String) {
