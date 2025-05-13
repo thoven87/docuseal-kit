@@ -7,6 +7,17 @@
 
 import Foundation
 
+public enum DocuSealSubmissionStatus: String, Codable, Sendable {
+    /// The submission has been fully completed by all signing parties
+    case completed
+    /// The submission has been declined by at least one party
+    case declined
+    /// The submission has reached its expiration date
+    case expired
+    /// The submission is still awaiting completion
+    case pending
+}
+
 // MARK: - Submission Models
 
 public struct Submission: Codable {
@@ -26,7 +37,7 @@ public struct Submission: Codable {
     public let createdByUser: UserReference?
     public let eventRecords: [EventRecord]?
     public let documents: [Document]?
-    public let status: String
+    public let status: DocuSealSubmissionStatus
 
     public init(
         id: Int,
@@ -45,7 +56,7 @@ public struct Submission: Codable {
         createdByUser: UserReference?,
         eventRecords: [EventRecord]?,
         documents: [Document]?,
-        status: String
+        status: DocuSealSubmissionStatus
     ) {
         self.id = id
         self.source = source
@@ -111,18 +122,12 @@ public struct SubmissionListResponse: Codable {
 
 // MARK: - Submission List Query
 
-public enum SubmissionStatus: String, Codable {
-    case pending
-    case completed
-    case declined
-    case expired
-}
 public struct SubmissionListQuery: Codable {
     /// The template ID allows you to receive only the submissions created from that specific template.
     public let templateId: Int?
     /// Filter submissions by status.
     /// Possible values: pending, completed, declined, expired
-    public let status: SubmissionStatus?
+    public let status: DocuSealSubmissionStatus?
     /// Filter submissions based on submitters name, email or phone partial match.
     public let q: String?
     /// Filter submissions by unique slug.
@@ -141,7 +146,7 @@ public struct SubmissionListQuery: Codable {
 
     public init(
         templateId: Int? = nil,
-        status: SubmissionStatus? = nil,
+        status: DocuSealSubmissionStatus? = nil,
         q: String? = nil,
         slug: String? = nil,
         templateFolder: String? = nil,

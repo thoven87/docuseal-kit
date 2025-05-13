@@ -10,9 +10,7 @@ extension DocuSealClient {
     /// List all submissions
     public func listSubmissions(
         query: SubmissionListQuery? = nil
-    ) async throws
-        -> SubmissionListResponse
-    {
+    ) async throws -> SubmissionListResponse {
         var path = "/submissions"
 
         if let query = query {
@@ -47,9 +45,7 @@ extension DocuSealClient {
     /// Create submissions from emails
     public func createSubmissionsFromEmails(
         request: CreateSubmissionsFromEmailsRequest
-    ) async throws
-        -> [Submitter]
-    {
+    ) async throws -> [Submitter] {
         let httpRequest = try makeRequest(path: "/submissions/emails", method: .POST, body: request)
         return try await executeRequest(httpRequest)
     }

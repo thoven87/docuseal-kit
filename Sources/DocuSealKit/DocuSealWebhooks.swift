@@ -85,7 +85,7 @@ public struct DocuSealFormWebhookData: Codable {
     public let sentAt: Date?
     /// The submitter status.
     /// Possible values: completed, declined, opened, sent, awaiting
-    public let status: DocuSealSubmissionStatus
+    public let status: DocuSealSubmitterStatus
     public let openedAt: Date?
     public let completedAt: Date?
     public let declinedAt: Date?
@@ -133,7 +133,7 @@ public struct DocuSealFormWebhookData: Codable {
         applicationKey: String?,
         declineReason: String?,
         sentAt: Date?,
-        status: DocuSealSubmissionStatus,
+        status: DocuSealSubmitterStatus,
         openedAt: Date?,
         completedAt: Date?,
         declinedAt: Date?,
@@ -259,24 +259,31 @@ public struct DocuSealSubmissionWebhookData: Codable {
     /// The submission archive date.
     public let archivedAt: Date?
     /// The submission creation date.
-    public let createdAt: Date
+    public let createdAt: Date?
     /// The submission update date.
-    public let updatedAt: Date
+    public let updatedAt: Date?
     /// The submission source.
     /// Possible values: invite, bulk, api, embed, link
-    public let source: Source
+    public let source: Source?
     /// The submitters order.
     /// Possible values: random, preserved
-    public let submittersOrder: SubmittersOrder
+    public let submittersOrder: SubmittersOrder?
     /// Audit log file URL.
     public let auditLogUrl: String?
     /// The list of submitters for the submission.
-    public let submitters: [Submitter]
+    public let submitters: [Submitter]?
+    /// Base template details.
     public let template: TemplateReference?
+    /// Creator
     public let createdByUser: UserReference?
-    public let webhookEvents: [DocuSealWebhookSubmissionEvent]?
+    /// Submission events
+    public let submissionEvents: [DocuSealWebhookSubmissionEvent]?
+    /// Documents
     public let documents: [Document]?
-    public let status: DocuSealSubmissionStatus
+    /// The submitter status.
+    /// Possible values: completed, declined, opened, sent, awaiting
+    public let status: DocuSealSubmissionStatus?
+    /// The date and time when the submission was fully completed.
     public let completedAt: Date?
 
     public enum Source: String, Codable {
@@ -298,7 +305,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
         submitters: [Submitter],
         template: TemplateReference?,
         createdByUser: UserReference?,
-        webhookEvents: [DocuSealWebhookSubmissionEvent]?,
+        submissionEvents: [DocuSealWebhookSubmissionEvent]?,
         documents: [Document]?,
         status: DocuSealSubmissionStatus,
         completedAt: Date?
@@ -313,7 +320,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
         self.submitters = submitters
         self.template = template
         self.createdByUser = createdByUser
-        self.webhookEvents = webhookEvents
+        self.submissionEvents = submissionEvents
         self.documents = documents
         self.status = status
         self.completedAt = completedAt
@@ -330,7 +337,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
         case submitters
         case template
         case createdByUser = "created_by_user"
-        case webhookEvents = "submission_events"
+        case submissionEvents = "submission_events"
         case documents
         case status
         case completedAt = "completed_at"
@@ -338,9 +345,13 @@ public struct DocuSealSubmissionWebhookData: Codable {
 }
 
 public struct DocuSealWebhookSubmissionEvent: Codable {
+    /// Submission event unique ID number.
     public let id: Int
+    /// Unique identifier of the submitter that triggered the event.
     public let submitterId: Int
+    /// Event type.
     public let eventType: EventType
+    /// Date and time when the event was triggered.
     public let eventTimestamp: Date
 
     public enum EventType: String, Codable {
