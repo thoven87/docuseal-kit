@@ -33,13 +33,17 @@ public struct SubmitterPreferences: Codable, Sendable {
 
 // MARK: - Submitter Models
 
-// The status of the submission.
-public enum DocuSealSubmissionStatus: String, Codable, Sendable {
+// The status of the submitter status.
+public enum DocuSealSubmitterStatus: String, Codable, Sendable {
+    /// Initial status when a submitter is created but hasn't been sent the document yet
     case awaiting
+    /// The submitter has completed their part of the signing process
     case completed
+    /// The submitter has declined to sign the document
     case declined
-    case failed
+    /// The submitter has opened the signing form
     case opened
+    /// The signing request has been sent to the submitter
     case sent
 }
 
@@ -79,7 +83,7 @@ public struct Submitter: Codable, Sendable {
     public let metadata: [String: String]?
     /// The submitter status.
     /// Possible values: completed, declined, opened, sent, awaiting
-    public let status: DocuSealSubmissionStatus
+    public let status: DocuSealSubmitterStatus
     /// An object with pre-filled values for the submission. Use field names for keys of the object. For more configurations see `fields` param.
     public let values: [FieldValue]?
     /// The submitter preferences.
@@ -112,7 +116,7 @@ public struct Submitter: Codable, Sendable {
         phone: String?,
         externalId: String?,
         metadata: [String: String]?,
-        status: DocuSealSubmissionStatus,
+        status: DocuSealSubmitterStatus,
         values: [FieldValue]?,
         preferences: SubmitterPreferences,
         role: String,
