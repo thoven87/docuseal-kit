@@ -23,7 +23,7 @@ public enum DocuSealSubmissionStatus: String, Codable, Sendable {
 public struct Submission: Codable {
     public let id: Int
     public let source: String
-    public let submittersOrder: String
+    public let submittersOrder: SubmittersOrder
     public let slug: String
     public let auditLogUrl: String?
     public let combinedDocumentUrl: String?
@@ -60,7 +60,7 @@ public struct Submission: Codable {
     ) {
         self.id = id
         self.source = source
-        self.submittersOrder = submittersOrder
+        self.submittersOrder = SubmittersOrder(rawValue: submittersOrder) ?? .preserved
         self.slug = slug
         self.auditLogUrl = auditLogUrl
         self.combinedDocumentUrl = combinedDocumentUrl
@@ -323,6 +323,10 @@ public struct SubmissionSubmitter: Codable {
     public let fields: [SubmissionField]?
     /// A list of roles for the submitter. Use this param to merge multiple roles into one submitter.
     public let roles: [String]?
+    /// The order of the submitter in the workflow (e.g., 0 for the first signer, 1 for the second, etc.). Use the same order number to create order groups.
+    public let order: Int?
+    /// Set to `true` to require phone 2FA verification via a one-time code sent to the phone number in order to access the documents.
+    public let requirePhone2FA: Bool?
 
     public init(
         name: String? = nil,
@@ -339,7 +343,9 @@ public struct SubmissionSubmitter: Codable {
         completedRedirectUrl: String? = nil,
         message: SubmissionMessage? = nil,
         fields: [SubmissionField]? = nil,
-        roles: [String]? = nil
+        roles: [String]? = nil,
+        order: Int? = nil,
+        requirePhone2FA: Bool? = nil
     ) {
         self.name = name
         self.role = role
@@ -356,6 +362,8 @@ public struct SubmissionSubmitter: Codable {
         self.message = message
         self.fields = fields
         self.roles = roles
+        self.order = order
+        self.requirePhone2FA = requirePhone2FA
     }
 
     enum CodingKeys: String, CodingKey {
@@ -374,6 +382,8 @@ public struct SubmissionSubmitter: Codable {
         case message
         case fields
         case roles
+        case order
+        case requirePhone2FA = "require_phone_2fa"
     }
 }
 
@@ -393,11 +403,8 @@ public struct SubmissionField: Codable, Sendable {
     public let title: String?
     /// Field description displayed on the signing form. Supports Markdown.
     public let description: String?
-    /// HTML field validation pattern string based on https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern specification.
-    /// Example: [A-Z]{4}
-    public let validationPattern: String?
-    /// A custom message to display on pattern validation failure.
-    public let invalidMessage: String?
+    /// Field validation configuration
+    public let validation: FieldValidation?
     /// Field preferences
     public let preferences: FieldPreferences?
 
@@ -408,8 +415,7 @@ public struct SubmissionField: Codable, Sendable {
         required: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
-        validationPattern: String? = nil,
-        invalidMessage: String? = nil,
+        validation: FieldValidation? = nil,
         preferences: FieldPreferences? = nil
     ) {
         self.name = name
@@ -418,8 +424,7 @@ public struct SubmissionField: Codable, Sendable {
         self.required = required
         self.title = title
         self.description = description
-        self.validationPattern = validationPattern
-        self.invalidMessage = invalidMessage
+        self.validation = validation
         self.preferences = preferences
     }
 
@@ -430,8 +435,7 @@ public struct SubmissionField: Codable, Sendable {
         case required
         case title
         case description
-        case validationPattern = "validation_pattern"
-        case invalidMessage = "invalid_message"
+        case validation
         case preferences
     }
 }
@@ -468,5 +472,359 @@ public struct CreateSubmissionsFromEmailsRequest: Codable {
         case emails
         case sendEmail = "send_email"
         case message
+    }
+}
+
+// MARK: - Create Submission From PDF Request
+public struct CreateSubmissionFromPdfRequest: Codable {
+    /// Base64 encoded PDF file or public URL
+    public let pdf: String
+
+    /// Name of the PDF file
+    public let name: String
+
+    /// Send email to submitters
+    public let sendEmail: Bool
+
+    /// Send SMS to submitters
+    public let sendSms: Bool
+
+    /// List of submitters
+    public let submitters: [SubmissionSubmitter]
+
+    /// BCC email for completed submissions
+    public let bccCompleted: String?
+
+    /// Reply-to email address
+    public let replyTo: String?
+
+    /// Expiration date (ISO 8601 format)
+    public let expireAt: String?
+
+    /// Message settings
+    public let message: SubmissionMessage?
+
+    /// External identifier
+    public let externalId: String?
+
+    /// Folder name
+    public let folderName: String?
+
+    /// Set `true` to merge the documents into a single PDF file.
+    public let mergeDocuments: Bool?
+
+    /// Pass `false` to disable the removal of {{text}} tags from the PDF. This can be used along with transparent text tags for faster and more robust PDF processing.
+    public let removeTags: Bool?
+
+    public init(
+        pdf: String,
+        name: String,
+        sendEmail: Bool = true,
+        sendSms: Bool = false,
+        submitters: [SubmissionSubmitter],
+        bccCompleted: String? = nil,
+        replyTo: String? = nil,
+        expireAt: String? = nil,
+        message: SubmissionMessage? = nil,
+        externalId: String? = nil,
+        folderName: String? = nil,
+        mergeDocuments: Bool? = nil,
+        removeTags: Bool? = nil
+    ) {
+        self.pdf = pdf
+        self.name = name
+        self.sendEmail = sendEmail
+        self.sendSms = sendSms
+        self.submitters = submitters
+        self.bccCompleted = bccCompleted
+        self.replyTo = replyTo
+        self.expireAt = expireAt
+        self.message = message
+        self.externalId = externalId
+        self.folderName = folderName
+        self.mergeDocuments = mergeDocuments
+        self.removeTags = removeTags
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case pdf
+        case name
+        case sendEmail = "send_email"
+        case sendSms = "send_sms"
+        case submitters
+        case bccCompleted = "bcc_completed"
+        case replyTo = "reply_to"
+        case expireAt = "expire_at"
+        case message
+        case externalId = "external_id"
+        case folderName = "folder_name"
+        case mergeDocuments = "merge_documents"
+        case removeTags = "remove_tags"
+    }
+}
+
+// MARK: - Create Submission From HTML Request
+public struct CreateSubmissionFromHtmlRequest: Codable {
+    /// HTML content
+    public let html: String
+
+    /// Name of the document
+    public let name: String
+
+    /// Send email to submitters
+    public let sendEmail: Bool
+
+    /// Send SMS to submitters
+    public let sendSms: Bool
+
+    /// List of submitters
+    public let submitters: [SubmissionSubmitter]
+
+    /// BCC email for completed submissions
+    public let bccCompleted: String?
+
+    /// Reply-to email address
+    public let replyTo: String?
+
+    /// Expiration date (ISO 8601 format)
+    public let expireAt: String?
+
+    /// Message settings
+    public let message: SubmissionMessage?
+
+    /// External identifier
+    public let externalId: String?
+
+    /// Folder name
+    public let folderName: String?
+
+    /// Set `true` to merge the documents into a single PDF file.
+    public let mergeDocuments: Bool?
+
+    public init(
+        html: String,
+        name: String,
+        sendEmail: Bool = true,
+        sendSms: Bool = false,
+        submitters: [SubmissionSubmitter],
+        bccCompleted: String? = nil,
+        replyTo: String? = nil,
+        expireAt: String? = nil,
+        message: SubmissionMessage? = nil,
+        externalId: String? = nil,
+        folderName: String? = nil,
+        mergeDocuments: Bool? = nil
+    ) {
+        self.html = html
+        self.name = name
+        self.sendEmail = sendEmail
+        self.sendSms = sendSms
+        self.submitters = submitters
+        self.bccCompleted = bccCompleted
+        self.replyTo = replyTo
+        self.expireAt = expireAt
+        self.message = message
+        self.externalId = externalId
+        self.folderName = folderName
+        self.mergeDocuments = mergeDocuments
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case html
+        case name
+        case sendEmail = "send_email"
+        case sendSms = "send_sms"
+        case submitters
+        case bccCompleted = "bcc_completed"
+        case replyTo = "reply_to"
+        case expireAt = "expire_at"
+        case message
+        case externalId = "external_id"
+        case folderName = "folder_name"
+        case mergeDocuments = "merge_documents"
+    }
+}
+
+// MARK: - Create Submission From DOCX Request
+public struct CreateSubmissionFromDocxRequest: Codable {
+    /// Base64 encoded DOCX file or public URL
+    public let docx: String
+
+    /// Name of the DOCX file
+    public let name: String
+
+    /// Send email to submitters
+    public let sendEmail: Bool
+
+    /// Send SMS to submitters
+    public let sendSms: Bool
+
+    /// List of submitters
+    public let submitters: [SubmissionSubmitter]
+
+    /// BCC email for completed submissions
+    public let bccCompleted: String?
+
+    /// Reply-to email address
+    public let replyTo: String?
+
+    /// Expiration date (ISO 8601 format)
+    public let expireAt: String?
+
+    /// Message settings
+    public let message: SubmissionMessage?
+
+    /// External identifier
+    public let externalId: String?
+
+    /// Folder name
+    public let folderName: String?
+
+    /// Set `true` to merge the documents into a single PDF file.
+    public let mergeDocuments: Bool?
+
+    /// Pass `false` to disable the removal of {{text}} tags from the PDF. This can be used along with transparent text tags for faster and more robust PDF processing.
+    public let removeTags: Bool?
+
+    public init(
+        docx: String,
+        name: String,
+        sendEmail: Bool = true,
+        sendSms: Bool = false,
+        submitters: [SubmissionSubmitter],
+        bccCompleted: String? = nil,
+        replyTo: String? = nil,
+        expireAt: String? = nil,
+        message: SubmissionMessage? = nil,
+        externalId: String? = nil,
+        folderName: String? = nil,
+        mergeDocuments: Bool? = nil,
+        removeTags: Bool? = nil
+    ) {
+        self.docx = docx
+        self.name = name
+        self.sendEmail = sendEmail
+        self.sendSms = sendSms
+        self.submitters = submitters
+        self.bccCompleted = bccCompleted
+        self.replyTo = replyTo
+        self.expireAt = expireAt
+        self.message = message
+        self.externalId = externalId
+        self.folderName = folderName
+        self.mergeDocuments = mergeDocuments
+        self.removeTags = removeTags
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case docx
+        case name
+        case sendEmail = "send_email"
+        case sendSms = "send_sms"
+        case submitters
+        case bccCompleted = "bcc_completed"
+        case replyTo = "reply_to"
+        case expireAt = "expire_at"
+        case message
+        case externalId = "external_id"
+        case folderName = "folder_name"
+        case mergeDocuments = "merge_documents"
+        case removeTags = "remove_tags"
+    }
+}
+
+// MARK: - Enhanced Create Submission Response
+public struct CreateSubmissionResponse: Codable {
+    /// Unique identifier of the submission
+    public let id: Int
+
+    /// List of submitters created for this submission
+    public let submitters: [Submitter]
+
+    /// Expiration date of the submission
+    public let expiredAt: Date?
+
+    /// Creation date of the submission
+    public let createdAt: Date
+
+    public init(id: Int, submitters: [Submitter], expiredAt: Date?, createdAt: Date) {
+        self.id = id
+        self.submitters = submitters
+        self.expiredAt = expiredAt
+        self.createdAt = createdAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case submitters
+        case expiredAt = "expired_at"
+        case createdAt = "created_at"
+    }
+}
+
+// MARK: - Field Validation
+public struct FieldValidation: Codable, Sendable {
+    /// HTML field validation pattern string based on https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern specification.
+    public let pattern: String?
+    /// A custom error message to display on validation failure.
+    public let message: String?
+    /// Minimum allowed number value or date depending on field type.
+    public let min: String?
+    /// Maximum allowed number value or date depending on field type.
+    public let max: String?
+    /// Increment step for number field. Pass 1 to accept only integers, or 0.01 to accept decimal currency.
+    public let step: Double?
+
+    public init(
+        pattern: String? = nil,
+        message: String? = nil,
+        min: String? = nil,
+        max: String? = nil,
+        step: Double? = nil
+    ) {
+        self.pattern = pattern
+        self.message = message
+        self.min = min
+        self.max = max
+        self.step = step
+    }
+}
+
+// MARK: - Query Parameters with Include Support
+public struct SubmissionQuery: Codable {
+    /// Include additional related data
+    public let include: String?
+
+    public init(include: String? = nil) {
+        self.include = include
+    }
+
+    public var queryItems: [URLQueryItem] {
+        var items: [URLQueryItem] = []
+
+        if let include = include {
+            items.append(URLQueryItem(name: "include", value: include))
+        }
+
+        return items
+    }
+}
+
+public struct SubmissionDocumentsQuery: Codable {
+    /// Include additional related data
+    public let include: String?
+
+    public init(include: String? = nil) {
+        self.include = include
+    }
+
+    public var queryItems: [URLQueryItem] {
+        var items: [URLQueryItem] = []
+
+        if let include = include {
+            items.append(URLQueryItem(name: "include", value: include))
+        }
+
+        return items
     }
 }

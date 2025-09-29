@@ -442,3 +442,23 @@ public struct TemplateListQuery: Codable, Sendable {
         return items
     }
 }
+
+// MARK: - Template Query with Include Support
+public struct TemplateQuery: Codable {
+    /// Include additional related data
+    public let include: String?
+
+    public init(include: String? = nil) {
+        self.include = include
+    }
+
+    public var queryItems: [URLQueryItem] {
+        var items: [URLQueryItem] = []
+
+        if let include = include {
+            items.append(URLQueryItem(name: "include", value: include))
+        }
+
+        return items
+    }
+}

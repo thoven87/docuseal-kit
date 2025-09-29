@@ -18,6 +18,8 @@ public struct CreateTemplateFromDocxRequest: Codable {
     public let externalId: String?
     /// The folder's name to which the template should be created.
     public let folderName: String?
+    /// Set to `true` to make the template available via a shared link. This will allow anyone with the link to create a submission from this template.
+    public let sharedLink: Bool?
     /// Documents to include with this payload
     public let documents: [TemplateDocumentRequest]
 
@@ -25,11 +27,13 @@ public struct CreateTemplateFromDocxRequest: Codable {
         name: String? = nil,
         externalId: String? = nil,
         folderName: String? = nil,
+        sharedLink: Bool? = nil,
         documents: [TemplateDocumentRequest]
     ) {
         self.name = name
         self.externalId = externalId
         self.folderName = folderName
+        self.sharedLink = sharedLink
         self.documents = documents
     }
 
@@ -37,6 +41,7 @@ public struct CreateTemplateFromDocxRequest: Codable {
         case name
         case externalId = "external_id"
         case folderName = "folder_name"
+        case sharedLink = "shared_link"
         case documents
     }
 }
@@ -195,6 +200,8 @@ public struct CreateTemplateFromHtmlRequest: Codable {
     public let externalId: String?
     /// The folder's name to which the template should be created.
     public let folderName: String?
+    /// Set to `true` to make the template available via a shared link. This will allow anyone with the link to create a submission from this template.
+    public let sharedLink: Bool?
     /// The list of documents built from HTML. Can be used to create a template with multiple documents. Leave `documents` param empty when using a top-level `html` param for a template with a single document.
     public let documents: [HtmlDocumentRequest]?
 
@@ -206,6 +213,7 @@ public struct CreateTemplateFromHtmlRequest: Codable {
         size: DocuSealPageSize = .letter,
         externalId: String? = nil,
         folderName: String? = nil,
+        sharedLink: Bool? = nil,
         documents: [HtmlDocumentRequest]? = nil
     ) {
         self.html = html
@@ -215,6 +223,7 @@ public struct CreateTemplateFromHtmlRequest: Codable {
         self.size = size
         self.externalId = externalId
         self.folderName = folderName
+        self.sharedLink = sharedLink
         self.documents = documents
     }
 
@@ -226,6 +235,7 @@ public struct CreateTemplateFromHtmlRequest: Codable {
         case size
         case externalId = "external_id"
         case folderName = "folder_name"
+        case sharedLink = "shared_link"
         case documents
     }
 }
@@ -255,6 +265,8 @@ public struct CreateTemplateFromPdfRequest: Codable {
     /// Your application-specific unique string key to identify this template within your app. Existing template with specified `external_id` will be updated with a new PDF.
     /// Example: unique-key
     public let externalId: String?
+    /// Set to `true` to make the template available via a shared link. This will allow anyone with the link to create a submission from this template.
+    public let sharedLink: Bool?
     /// Documents
     public let documents: [TemplateDocumentRequest]
     /// Remove PDF form fields from the document.
@@ -271,6 +283,7 @@ public struct CreateTemplateFromPdfRequest: Codable {
         name: String? = nil,
         folderName: String? = nil,
         externalId: String? = nil,
+        sharedLink: Bool? = nil,
         documents: [TemplateDocumentRequest],
         flatten: Bool = false,
         removeTags: Bool = true
@@ -278,6 +291,7 @@ public struct CreateTemplateFromPdfRequest: Codable {
         self.name = name
         self.folderName = folderName
         self.externalId = externalId
+        self.sharedLink = sharedLink
         self.documents = documents
         self.flatten = flatten
         self.removeTags = removeTags
@@ -287,6 +301,7 @@ public struct CreateTemplateFromPdfRequest: Codable {
         case name
         case folderName = "folder_name"
         case externalId = "external_id"
+        case sharedLink = "shared_link"
         case documents
         case flatten
         case removeTags = "remove_tags"
