@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "docuseal-kit",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v15)],
     products: [
         .library(
             name: "DocuSealKit",
@@ -11,9 +11,9 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.26.0"),
-        .package(url: "https://github.com/vapor/jwt-kit.git", from: "5.1.2"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.6.3"),
+        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.28.0"),
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "5.2.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.6.4"),
     ],
     targets: [
         .target(
