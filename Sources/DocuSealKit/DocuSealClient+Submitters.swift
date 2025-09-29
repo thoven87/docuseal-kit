@@ -23,8 +23,17 @@ extension DocuSealClient {
     }
 
     /// Get a submitter by ID
-    public func getSubmitter(id: Int) async throws -> Submitter {
-        let request = makeRequest(path: "/submitters/\(id)", method: .GET)
+    public func getSubmitter(id: Int, query: SubmitterQuery? = nil) async throws -> Submitter {
+        var path = "/submitters/\(id)"
+
+        if let query = query {
+            let queryItems = query.queryItems.map { "\($0.name)=\($0.value ?? "")" }
+            if !queryItems.isEmpty {
+                path += "?" + queryItems.joined(separator: "&")
+            }
+        }
+
+        let request = makeRequest(path: path, method: .GET)
         return try await executeRequest(request)
     }
 
