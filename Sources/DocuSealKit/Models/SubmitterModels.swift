@@ -189,6 +189,26 @@ public struct SubmitterListResponse: Codable {
     }
 }
 
+// MARK: - Submitter Query with Include Support
+public struct SubmitterQuery: Codable {
+    /// Include additional related data
+    public let include: String?
+
+    public init(include: String? = nil) {
+        self.include = include
+    }
+
+    public var queryItems: [URLQueryItem] {
+        var items: [URLQueryItem] = []
+
+        if let include = include {
+            items.append(URLQueryItem(name: "include", value: include))
+        }
+
+        return items
+    }
+}
+
 // MARK: - Submitter List Query
 
 public struct SubmitterListQuery: Codable {

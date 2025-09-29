@@ -16,13 +16,13 @@ import struct NIOCore.TimeAmount
 
 public struct DocuSealClient: Sendable {
     private let httpClient: HTTPClient
-    private let baseURL: String
-    private let apiKey: String
+    internal var baseURL: String
+    private var apiKey: String
     private let logger: Logger
-    private let timeout: TimeAmount
+    private var timeout: TimeAmount
     private let userAgent: String = "DocuSeal Swift SDK/1.0"
 
-    internal let keys: JWTKeyCollection
+    internal var keys: JWTKeyCollection
 
     public init(
         baseURL: String = "https://api.docuseal.com",
@@ -37,6 +37,28 @@ public struct DocuSealClient: Sendable {
         self.logger = logger
         self.timeout = timeout
         self.keys = await JWTKeyCollection().add(hmac: .init(from: apiKey), digestAlgorithm: .sha256)
+    }
+
+    // MARK: - Configuration
+
+    /// Configure the client with new settings
+    public mutating func configure(
+        baseURL: String? = nil,
+        apiKey: String? = nil,
+        timeout: TimeAmount? = nil
+    ) async {
+        if let baseURL = baseURL {
+            self.baseURL = baseURL
+        }
+
+        if let apiKey = apiKey {
+            self.apiKey = apiKey
+            self.keys = await JWTKeyCollection().add(hmac: .init(from: apiKey), digestAlgorithm: .sha256)
+        }
+
+        if let timeout = timeout {
+            self.timeout = timeout
+        }
     }
 
     // MARK: - Helper Methods

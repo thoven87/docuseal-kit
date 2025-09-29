@@ -49,9 +49,9 @@ public struct FieldPreferences: Codable, Sendable {
     /// Default: USD
     /// Possible values: USD, EUR, GBP, CAD, AUD
     public let currency: Currency?
-    /// Set `true` to make sensitive data masked on the document.
+    /// Set `true` to make sensitive data masked on the document, or provide a number for custom masking.
     /// Default: false
-    public let mask: Bool?
+    public let mask: MaskValue?
 
     public enum Currency: String, Codable, Sendable {
         case usd = "USD"
@@ -102,5 +102,52 @@ public struct FieldPreferences: Codable, Sendable {
         case price
         case currency
         case mask
+    }
+}
+
+// MARK: - MaskValue Support
+public enum MaskValue: Codable, Sendable {
+    case bool(Bool)
+    case number(Int)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let boolValue = try? container.decode(Bool.self) {
+            self = .bool(boolValue)
+        } else if let intValue = try? container.decode(Int.self) {
+            self = .number(intValue)
+        } else {
+            throw DecodingError.typeMismatch(
+                MaskValue.self,
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Expected Bool or Int for mask value"
+                )
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        switch self {
+        case .bool(let value):
+            try container.encode(value)
+        case .number(let value):
+            try container.encode(value)
+        }
+    }
+}
+
+extension MaskValue {
+    /// Convenience initializer for boolean values
+    public static func mask(_ value: Bool) -> MaskValue {
+        .bool(value)
+    }
+
+    /// Convenience initializer for number values
+    public static func mask(_ value: Int) -> MaskValue {
+        .number(value)
     }
 }
