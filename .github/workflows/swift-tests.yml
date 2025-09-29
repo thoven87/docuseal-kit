@@ -1,23 +1,33 @@
-name: Swift Tests
+name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+    paths:
+      - "**.swift"
+      - "**.yml"
   pull_request:
-    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-ci
+  cancel-in-progress: true
+
+env:
+  LOG_LEVEL: info
+  SWIFT_DETERMINISTIC_HASHING: 1
 
 jobs:
-  test-linux:
-    name: Test on Ubuntu with Swift 6
+  linux:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Swift 6
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.0"
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Build
+        run: swift build --build-tests --configuration debug -Xswiftc -enable-testing -Xswiftc -warnings-as-errors -Xcc -Werror
       - name: Run Tests
-        run: swift test --enable-code-coverage
+        run: |
+          swift test --skip-build --configuration debug --disable-xctest
