@@ -1,0 +1,21 @@
+name: Swift Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test-linux:
+    name: Test on Ubuntu with Swift 6
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Swift 6
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
