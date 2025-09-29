@@ -26,11 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Build with warnings as errors
-        # Pass the flags through an environment variable to avoid conflicts
-        env:
-          SWIFT_BUILD_FLAGS: "-Xswiftc -warnings-as-errors -Xcc -Werror"
-        run: |
-          swift build --build-tests --configuration debug $SWIFT_BUILD_FLAGS
+      - name: Build
+        run: swift build --build-tests --configuration debug -Xswiftc -enable-testing -Xswiftc -warnings-as-errors -Xcc -Werror
       - name: Run Tests
-        run: swift test --skip-build --configuration debug --disable-xctest
+        run: |
+          swift test --skip-build --configuration debug --disable-xctest
