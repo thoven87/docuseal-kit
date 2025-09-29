@@ -26,8 +26,17 @@ extension DocuSealClient {
     }
 
     /// Get a template by ID
-    public func getTemplate(id: Int) async throws -> Template {
-        let request = makeRequest(path: "/templates/\(id)", method: .GET)
+    public func getTemplate(id: Int, query: TemplateQuery? = nil) async throws -> Template {
+        var path = "/templates/\(id)"
+
+        if let query = query {
+            let queryItems = query.queryItems.map { "\($0.name)=\($0.value ?? "")" }
+            if !queryItems.isEmpty {
+                path += "?" + queryItems.joined(separator: "&")
+            }
+        }
+
+        let request = makeRequest(path: path, method: .GET)
         return try await executeRequest(request)
     }
 
@@ -103,6 +112,13 @@ extension DocuSealClient {
     /// Archive a template
     public func archiveTemplate(id: Int) async throws -> ArchiveResponse {
         let request = makeRequest(path: "/templates/\(id)", method: .DELETE)
+        return try await executeRequest(request)
+    }
+
+    /// Permanently delete a template
+    public func permanentlyDeleteTemplate(id: Int) async throws -> ArchiveResponse {
+        var request = makeRequest(path: "/templates/\(id)", method: .DELETE)
+        request.url = "\(baseURL)/templates/\(id)?permanently=true"
         return try await executeRequest(request)
     }
 
