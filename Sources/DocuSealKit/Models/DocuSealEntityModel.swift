@@ -12,7 +12,7 @@ public struct DocuSealSubmitterEntityModel: Codable, Sendable {
     /// Person or Organization name
     public var name: String
     /// Role of the entity e.g Vender, Customer, Employee e.t.c
-    public var role: String
+    public var role: String?
     /// Email of the entity
     public var email: String?
     /// Phone number of the enity
@@ -27,7 +27,7 @@ public struct DocuSealSubmitterEntityModel: Codable, Sendable {
     /// Init
     public init(
         name: String,
-        role: String,
+        role: String? = nil,
         email: String? = nil,
         phone: String? = nil,
         metadata: [String: String]? = nil,

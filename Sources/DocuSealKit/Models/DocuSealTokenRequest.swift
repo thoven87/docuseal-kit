@@ -15,7 +15,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     let intergrationEmail: String
 
     /// New template name when creating a template with document_urls specified.
-    let name: String
+    let name: String?
 
     /// An array with public and downloadable document URLs to be opened in the form builder.
     /// Pass empty array to allow users to upload their files.
@@ -29,7 +29,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     var templateID: Int?
 
     /// The folder name in which the template should be created.
-    var folderName: String
+    var folderName: String?
 
     /// Pass `false` to disable automatic PDF form fields extraction.
     /// PDF fields are automatically added by default.
@@ -49,10 +49,10 @@ public struct DocuSealTokenRequest: JWTPayload {
         externalID: String,
         userEmail: String,
         intergrationEmail: String,
-        templateName: String,
-        documentURLs: [String],
+        templateName: String? = nil,
+        documentURLs: [String] = [],
         templateID: Int? = nil,
-        folderName: String = "",
+        folderName: String? = nil,
         extractFields: Bool? = nil
     ) {
         self.externalID = externalID
