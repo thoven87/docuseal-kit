@@ -7,6 +7,7 @@
 
 import Foundation
 import NIOFoundationCompat
+import NIOCore
 
 public enum DocuSealWebhookEventType: String, Codable {
     // Form Webhooks
@@ -519,7 +520,7 @@ public typealias DocuSealTemplateWebhookEvent = DocuSealWebhookEvent<DocuSealTem
 public struct DocusealWebhookHandler {
     /// Verify if the webhook request signature is valid (verify that the request came from DocuSeal)
     public static func verifySignature(
-        requestBody: Data,
+        requestBody: ByteBuffer,
         signatureHeader: String,
         webhookSecret: String
     ) -> Bool {
@@ -539,9 +540,9 @@ public struct DocusealWebhookHandler {
 
     /// Parse the webhook event from the request body
     public static func parseWebhookEvent(
-        from data: Data
+        from buffer: ByteBuffer
     ) throws -> (
-        type: DocuSealWebhookEventType, payload: Data
+        type: DocuSealWebhookEventType, payload: ByteBuffer
     ) {
         // First parse just to get the event type
         struct EventTypeContainer: Codable {
@@ -555,34 +556,34 @@ public struct DocusealWebhookHandler {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        let eventTypeContainer = try decoder.decode(EventTypeContainer.self, from: data)
+        let eventTypeContainer = try decoder.decode(EventTypeContainer.self, from: buffer)
         guard let eventType = DocuSealWebhookEventType(rawValue: eventTypeContainer.eventType) else {
             throw DocuSealError.decodingError(
                 message: "DocusealWebhookHandler -> Invalid event type: \(eventTypeContainer.eventType)"
             )
         }
 
-        return (type: eventType, payload: data)
+        return (type: eventType, payload: buffer)
     }
 
     /// Process form webhook events
-    public static func processFormEvent(data: Data) throws -> DocuSealFormWebhookEvent {
+    public static func processFormEvent(buffer: ByteBuffer) throws -> DocuSealFormWebhookEvent {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealFormWebhookEvent.self, from: data)
+        return try decoder.decode(DocuSealFormWebhookEvent.self, from: buffer)
     }
 
     /// Process submission webhook events
-    public static func processSubmissionEvent(data: Data) throws -> DocuSealSubmissionWebhookEvent {
+    public static func processSubmissionEvent(buffer: ByteBuffer) throws -> DocuSealSubmissionWebhookEvent {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealSubmissionWebhookEvent.self, from: data)
+        return try decoder.decode(DocuSealSubmissionWebhookEvent.self, from: buffer)
     }
 
     /// Process template webhook events
-    public static func processTemplateEvent(data: Data) throws -> DocuSealTemplateWebhookEvent {
+    public static func processTemplateEvent(buffer: ByteBuffer) throws -> DocuSealTemplateWebhookEvent {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealTemplateWebhookEvent.self, from: data)
+        return try decoder.decode(DocuSealTemplateWebhookEvent.self, from: buffer)
     }
 }

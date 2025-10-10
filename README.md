@@ -140,7 +140,7 @@ print("Created submission for \(submitters.count) submitters")
 
 ```swift
 // In your webhook handler
-func handleDocuSealWebhook(requestBody: Data) async throws {
+func handleDocuSealWebhook(requestBody: Bytebuffer) async throws {
     // Parse webhook event type
     let (eventType, payload) = try DocusealWebhookHandler.parseWebhookEvent(from: requestBody)
     
