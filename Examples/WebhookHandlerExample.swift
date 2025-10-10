@@ -20,7 +20,7 @@ struct DocuSealWebhookController {
     /// Handle a webhook request
     /// - Parameter requestBody: The raw request body data
     /// - Returns: A boolean indicating if the webhook was processed successfully
-    func handleWebhook(requestBody: Data) async -> Bool {
+    func handleWebhook(requestBody: ByteBuffer) async -> Bool {
         do {
             // Parse the webhook event
             let (eventType, payload) = try DocusealWebhookHandler.parseWebhookEvent(from: requestBody)
