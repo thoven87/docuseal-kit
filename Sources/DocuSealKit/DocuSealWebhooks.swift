@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import NIOFoundationCompat
 import NIOCore
+import NIOFoundationCompat
 
 public enum DocuSealWebhookEventType: String, Codable {
     // Form Webhooks
@@ -77,9 +77,6 @@ public struct DocuSealFormWebhookData: Codable {
     public let role: String?
     /// Your application-specific unique string key to identify submitter within your app.
     public let externalId: String?
-    /// Your application-specific unique string key to identify submitter within your app. Backward compatibility with the previous version of the API. Use external_id instead.
-    @available(*, deprecated, renamed: "externalId")
-    public let applicationKey: String?
     /// Submitter provided decline message.
     public let declineReason: String?
     /// Sent At
@@ -131,7 +128,6 @@ public struct DocuSealFormWebhookData: Codable {
         phone: String?,
         role: String?,
         externalId: String?,
-        applicationKey: String?,
         declineReason: String?,
         sentAt: Date?,
         status: DocuSealSubmitterStatus,
@@ -158,7 +154,6 @@ public struct DocuSealFormWebhookData: Codable {
         self.phone = phone
         self.role = role
         self.externalId = externalId
-        self.applicationKey = applicationKey
         self.declineReason = declineReason
         self.sentAt = sentAt
         self.status = status
@@ -187,7 +182,6 @@ public struct DocuSealFormWebhookData: Codable {
         case phone
         case role
         case externalId = "external_id"
-        case applicationKey = "application_key"
         case declineReason = "decline_reason"
         case sentAt = "sent_at"
         case status
