@@ -524,24 +524,22 @@ public typealias DocuSealTemplateWebhookEvent = DocuSealWebhookEvent<DocuSealTem
 // MARK: - Webhook Handler
 
 public struct DocusealWebhookHandler {
-    /// Verify if the webhook request signature is valid (verify that the request came from DocuSeal)
-    public static func verifySignature(
-        requestBody: ByteBuffer,
-        signatureHeader: String,
-        webhookSecret: String
-    ) -> Bool {
-        // DocuSeal doesn't currently provide a specific signature verification mechanism
-        // This method is prepared for future implementation
-        // For now, return true but can be enhanced when DocuSeal adds signature verification
-        true
-    }
-
-    /// Verify if the webhook request credentials are valid (verify that the request came from DocuSeal)
-    public static func verifyCredentials(
-        key: String,
-        value: String
-    ) -> Bool {
-        key == value
+    /// Verify if the webhook request is valid using DocuSeal's key-value authentication
+    /// DocuSeal sends webhook secrets as key-value pairs in request headers
+    /// Configure this in DocuSeal Console > Webhooks > Add Secret
+    /// Throws DocuSealError.webhookAuthenticationError if verification fails
+    public static func verifyWebhookSecret(
+        receivedKey: String,
+        receivedValue: String,
+        expectedKey: String,
+        expectedValue: String
+    ) throws {
+        guard receivedKey == expectedKey && receivedValue == expectedValue else {
+            throw DocuSealError.webhookAuthenticationError(
+                message:
+                    "Invalid webhook credentials - received key '\(receivedKey)' with value '\(receivedValue)' does not match expected credentials"
+            )
+        }
     }
 
     /// Parse the webhook event from the request body and return categorized event
