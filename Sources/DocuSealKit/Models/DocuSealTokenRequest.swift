@@ -12,7 +12,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     let userEmail: String
 
     /// Email address of your SaaS user that opens the document form builder.
-    let intergrationEmail: String
+    let integrationEmail: String
 
     /// New template name when creating a template with document_urls specified.
     let name: String?
@@ -39,7 +39,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     /// - Parameters:
     ///   - externalID: Unique string to tag the opened document within the DocuSeal platform and to be able to reopen the form using this unique key.
     ///   - userEmail: Email address of the DocuSeal admin user that provided the API_KEY for JWT signing.
-    ///   - intergrationEmail: Email address of your SaaS user that opens the document form builder.
+    ///   - integrationEmail: Email address of your SaaS user that opens the document form builder.
     ///   - templateName: New template name when creating a template with document_urls specified.
     ///   - documentURLs: An array with public and downloadable document URLs to be opened in the form builder. Pass empty array to allow users to upload their files.
     ///   - templateID: ID of the existing template to open in the form builder - leave empty if `documents_urls[]` is specified. Templates can be created via the HTML API or PDF export API.
@@ -48,7 +48,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     public init(
         externalID: String,
         userEmail: String,
-        intergrationEmail: String,
+        integrationEmail: String,
         templateName: String? = nil,
         documentURLs: [String] = [],
         templateID: Int? = nil,
@@ -57,7 +57,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     ) {
         self.externalID = externalID
         self.userEmail = userEmail
-        self.intergrationEmail = intergrationEmail
+        self.integrationEmail = integrationEmail
         self.name = templateName
         self.documentURLs = documentURLs
         self.templateID = templateID
@@ -73,7 +73,7 @@ public struct DocuSealTokenRequest: JWTPayload {
     enum CodingKeys: String, CodingKey {
         case externalID = "external_id"
         case userEmail = "user_email"
-        case intergrationEmail = "integration_email"
+        case integrationEmail = "integration_email"
         case name
         case documentURLs = "document_urls"
         case templateID = "template_id"
