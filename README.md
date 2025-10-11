@@ -224,19 +224,18 @@ DocuSeal Kit supports three types of webhook events with full type safety:
 - `template.created` - New template was created
 - `template.updated` - Template was updated
 
-#### Webhook Signature Verification
+#### Webhook Authentication
+
+DocuSeal uses key-value pairs in request headers for webhook authentication. Configure this in DocuSeal Console > Webhooks > Add Secret.
 
 ```swift
-// Verify webhook signature for security
-let isValid = DocusealWebhookHandler.verifySignature(
-    requestBody: requestBody,
-    signatureHeader: "signature_from_header",
-    webhookSecret: "your_webhook_secret"
+// Verify webhook authenticity - throws DocuSealError.webhookAuthenticationError if invalid
+try DocusealWebhookHandler.verifyWebhookSecret(
+    receivedKey: request.headers["X-Secret-Key"]?.first ?? "",
+    receivedValue: request.headers["X-Secret-Value"]?.first ?? "",
+    expectedKey: "your-secret-key",
+    expectedValue: "your-secret-value"
 )
-
-guard isValid else {
-    throw YourError.invalidWebhookSignature
-}
 ```
 
 #### Type-Safe Event Processing

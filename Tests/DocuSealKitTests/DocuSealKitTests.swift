@@ -860,3 +860,78 @@ struct ClientConfigurationTests {
         #expect(webhook.data.values?.isEmpty == true)
     }
 }
+
+// MARK: - Webhook Verification Tests
+
+@Suite("Webhook Verification Tests")
+struct WebhookVerificationTests {
+
+    @Test("Webhook secret verification succeeds with correct credentials")
+    func testWebhookSecretVerificationSuccess() throws {
+        // Should not throw any error
+        try DocusealWebhookHandler.verifyWebhookSecret(
+            receivedKey: "X-DocuSeal-Secret-Key",
+            receivedValue: "my-secret-value",
+            expectedKey: "X-DocuSeal-Secret-Key",
+            expectedValue: "my-secret-value"
+        )
+    }
+
+    @Test("Webhook secret verification fails with wrong key")
+    func testWebhookSecretVerificationFailsWrongKey() throws {
+        #expect {
+            try DocusealWebhookHandler.verifyWebhookSecret(
+                receivedKey: "Wrong-Key",
+                receivedValue: "my-secret-value",
+                expectedKey: "X-DocuSeal-Secret-Key",
+                expectedValue: "my-secret-value"
+            )
+        } throws: { error in
+            if let docuSealError = error as? DocuSealError,
+                case .webhookAuthenticationError(_) = docuSealError
+            {
+                return true
+            }
+            return false
+        }
+    }
+
+    @Test("Webhook secret verification fails with wrong value")
+    func testWebhookSecretVerificationFailsWrongValue() throws {
+        #expect {
+            try DocusealWebhookHandler.verifyWebhookSecret(
+                receivedKey: "X-DocuSeal-Secret-Key",
+                receivedValue: "wrong-value",
+                expectedKey: "X-DocuSeal-Secret-Key",
+                expectedValue: "my-secret-value"
+            )
+        } throws: { error in
+            if let docuSealError = error as? DocuSealError,
+                case .webhookAuthenticationError(_) = docuSealError
+            {
+                return true
+            }
+            return false
+        }
+    }
+
+    @Test("Webhook secret verification fails with empty credentials")
+    func testWebhookSecretVerificationFailsEmpty() throws {
+        #expect {
+            try DocusealWebhookHandler.verifyWebhookSecret(
+                receivedKey: "",
+                receivedValue: "",
+                expectedKey: "X-DocuSeal-Secret-Key",
+                expectedValue: "my-secret-value"
+            )
+        } throws: { error in
+            if let docuSealError = error as? DocuSealError,
+                case .webhookAuthenticationError(_) = docuSealError
+            {
+                return true
+            }
+            return false
+        }
+    }
+
+}

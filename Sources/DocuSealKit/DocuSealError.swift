@@ -12,6 +12,7 @@ public enum DocuSealError: Error {
     case decodingError(message: String)
     case encodingError(message: String)
     case invalidURL(url: String)
+    case webhookAuthenticationError(message: String)
 }
 
 extension DocuSealError: CustomStringConvertible {
@@ -25,6 +26,8 @@ extension DocuSealError: CustomStringConvertible {
             return "Encoding error: \(error)"
         case .invalidURL(let url):
             return "Invalid URL: \(url)"
+        case .webhookAuthenticationError(let message):
+            return "Webhook authentication error: \(message)"
         }
     }
 }
