@@ -9,37 +9,48 @@ import Foundation
 import NIOCore
 import NIOFoundationCompat
 
-public enum DocuSealWebhookEventType: String, Codable {
-    // Form Webhooks
-    case formViewed = "form.viewed"
-    case formStarted = "form.started"
-    case formCompleted = "form.completed"
-    case formDeclined = "form.declined"
-
+public enum DocuSealSubmissionWebhookEventType: String, Codable {
     // Submission Webhooks
     case submissionCreated = "submission.created"
     case submissionArchived = "submission.archived"
     case submissionCompleted = "submission.completed"
     case submissionExpired = "submission.expired"
+}
 
+public enum DocuSealFormWebhookEventType: String, Codable {
+    // Form Webhooks
+    case formViewed = "form.viewed"
+    case formStarted = "form.started"
+    case formCompleted = "form.completed"
+    case formDeclined = "form.declined"
+}
+
+public enum DocuSealTemplateWebhookEventType: String, Codable {
     // Template Webhooks
     case templateCreated = "template.created"
     case templateUpdated = "template.updated"
 }
 
+// MARK: - Webhook Event Categories
+
+public enum DocuSealWebhookEventCategory {
+    case submissionEvent(DocuSealSubmissionWebhookEvent)
+    case formEvent(DocuSealFormWebhookEvent)
+    case templateEvent(DocuSealTemplateWebhookEvent)
+}
+
 // MARK: - Base Webhook Event
 
-public struct DocuSealWebhookEvent<T: Codable>: Codable {
+public struct DocuSealWebhookEvent<T: Codable, E: Codable>: Codable {
     /// The event type.
-    /// Possible values: form.viewed, form.started, form.completed
-    public let eventType: DocuSealWebhookEventType
+    public let eventType: E
     /// The event timestamp.
     /// Example: 2023-09-24T11:20:42Z
     public let timestamp: Date
     /// Submitted data object.
     public let data: T
 
-    public init(eventType: DocuSealWebhookEventType, timestamp: Date, data: T) {
+    public init(eventType: E, timestamp: Date, data: T) {
         self.eventType = eventType
         self.timestamp = timestamp
         self.data = data
@@ -503,11 +514,12 @@ public struct DocuSealTemplateWebhookData: Codable {
 
 // MARK: - Typealias for Webhook Events
 
-public typealias DocuSealFormWebhookEvent = DocuSealWebhookEvent<DocuSealFormWebhookData>
+public typealias DocuSealFormWebhookEvent = DocuSealWebhookEvent<DocuSealFormWebhookData, DocuSealFormWebhookEventType>
 public typealias DocuSealSubmissionWebhookEvent = DocuSealWebhookEvent<
-    DocuSealSubmissionWebhookData
+    DocuSealSubmissionWebhookData,
+    DocuSealSubmissionWebhookEventType
 >
-public typealias DocuSealTemplateWebhookEvent = DocuSealWebhookEvent<DocuSealTemplateWebhookData>
+public typealias DocuSealTemplateWebhookEvent = DocuSealWebhookEvent<DocuSealTemplateWebhookData, DocuSealTemplateWebhookEventType>
 
 // MARK: - Webhook Handler
 
@@ -532,12 +544,10 @@ public struct DocusealWebhookHandler {
         key == value
     }
 
-    /// Parse the webhook event from the request body
+    /// Parse the webhook event from the request body and return categorized event
     public static func parseWebhookEvent(
         from buffer: ByteBuffer
-    ) throws -> (
-        type: DocuSealWebhookEventType, payload: ByteBuffer
-    ) {
+    ) throws -> DocuSealWebhookEventCategory {
         // First parse just to get the event type
         struct EventTypeContainer: Codable {
             let eventType: String
@@ -551,33 +561,25 @@ public struct DocusealWebhookHandler {
         decoder.dateDecodingStrategy = .iso8601
 
         let eventTypeContainer = try decoder.decode(EventTypeContainer.self, from: buffer)
-        guard let eventType = DocuSealWebhookEventType(rawValue: eventTypeContainer.eventType) else {
+
+        // Determine category and parse appropriate event type
+        switch eventTypeContainer.eventType {
+        case "submission.created", "submission.archived", "submission.completed", "submission.expired":
+            let event = try decoder.decode(DocuSealSubmissionWebhookEvent.self, from: buffer)
+            return .submissionEvent(event)
+
+        case "form.viewed", "form.started", "form.completed", "form.declined":
+            let event = try decoder.decode(DocuSealFormWebhookEvent.self, from: buffer)
+            return .formEvent(event)
+
+        case "template.created", "template.updated":
+            let event = try decoder.decode(DocuSealTemplateWebhookEvent.self, from: buffer)
+            return .templateEvent(event)
+
+        default:
             throw DocuSealError.decodingError(
                 message: "DocusealWebhookHandler -> Invalid event type: \(eventTypeContainer.eventType)"
             )
         }
-
-        return (type: eventType, payload: buffer)
-    }
-
-    /// Process form webhook events
-    public static func processFormEvent(buffer: ByteBuffer) throws -> DocuSealFormWebhookEvent {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealFormWebhookEvent.self, from: buffer)
-    }
-
-    /// Process submission webhook events
-    public static func processSubmissionEvent(buffer: ByteBuffer) throws -> DocuSealSubmissionWebhookEvent {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealSubmissionWebhookEvent.self, from: buffer)
-    }
-
-    /// Process template webhook events
-    public static func processTemplateEvent(buffer: ByteBuffer) throws -> DocuSealTemplateWebhookEvent {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DocuSealTemplateWebhookEvent.self, from: buffer)
     }
 }

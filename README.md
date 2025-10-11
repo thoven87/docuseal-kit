@@ -140,14 +140,14 @@ print("Created submission for \(submitters.count) submitters")
 
 ```swift
 // In your webhook handler
-func handleDocuSealWebhook(requestBody: Bytebuffer) async throws {
-    // Parse webhook event type
-    let (eventType, payload) = try DocusealWebhookHandler.parseWebhookEvent(from: requestBody)
-    
-    // Process based on event type
-    switch eventType {
-    case .formCompleted:
-        let event = try DocusealWebhookHandler.processFormEvent(data: payload)
+func handleDocuSealWebhook(requestBody: ByteBuffer) async throws {
+    // Parse webhook event once - returns categorized event with parsed data
+    let eventCategory = try DocusealWebhookHandler.parseWebhookEvent(from: requestBody)
+
+    // Process based on event category
+    switch eventCategory {
+    case .formEvent(let event):
+        print("Form event: \(event.eventType.rawValue)")
         print("Form completed: \(event.data.id)")
         // Download documents
         if let documents = event.data.documents {
@@ -155,17 +155,20 @@ func handleDocuSealWebhook(requestBody: Bytebuffer) async throws {
                 // Download document from document.url
             }
         }
-        
-    case .submissionCreated:
-        let event = try DocusealWebhookHandler.processSubmissionEvent(data: payload)
+
+    case .submissionEvent(let event):
+        print("Submission event: \(event.eventType.rawValue)")
         print("Submission created: \(event.data.id)")
-        
-    case .templateUpdated:
-        let event = try DocusealWebhookHandler.processTemplateEvent(data: payload)
+        // Access strongly-typed submission data
+        if let status = event.data.status {
+            print("Status: \(status)")
+        }
+
+    case .templateEvent(let event):
+        print("Template event: \(event.eventType.rawValue)")
         print("Template updated: \(event.data.id)")
-        
-    default:
-        print("Unhandled event type: \(eventType)")
+        // Access template-specific data
+        print("Template name: \(event.data.name)")
     }
 }
 ```
@@ -200,9 +203,66 @@ The client supports the following DocuSeal API endpoints:
 - Update a submitter
 
 ### Webhooks
-- Form webhooks
-- Submission webhooks
-- Template webhooks
+
+DocuSeal Kit supports three types of webhook events with full type safety:
+
+#### Event Types
+
+**Form Events:**
+- `form.viewed` - Form was viewed by a submitter
+- `form.started` - Form submission was started
+- `form.completed` - Form was completed by a submitter
+- `form.declined` - Form was declined by a submitter
+
+**Submission Events:**
+- `submission.created` - New submission was created
+- `submission.archived` - Submission was archived
+- `submission.completed` - All submitters completed the submission
+- `submission.expired` - Submission expired
+
+**Template Events:**
+- `template.created` - New template was created
+- `template.updated` - Template was updated
+
+#### Webhook Signature Verification
+
+```swift
+// Verify webhook signature for security
+let isValid = DocusealWebhookHandler.verifySignature(
+    requestBody: requestBody,
+    signatureHeader: "signature_from_header",
+    webhookSecret: "your_webhook_secret"
+)
+
+guard isValid else {
+    throw YourError.invalidWebhookSignature
+}
+```
+
+#### Type-Safe Event Processing
+
+The `parseWebhookEvent` method performs single JSON decode and returns strongly-typed events:
+
+```swift
+let eventCategory = try DocusealWebhookHandler.parseWebhookEvent(from: requestBody)
+
+switch eventCategory {
+case .submissionEvent(let event):
+    // event.eventType guaranteed to be submission-only:
+    // .submissionCreated, .submissionArchived, .submissionCompleted, .submissionExpired
+    print("Submission \(event.data.id) - \(event.eventType.rawValue)")
+
+case .formEvent(let event):
+    // event.eventType guaranteed to be form-only:
+    // .formViewed, .formStarted, .formCompleted, .formDeclined
+    print("Form event: \(event.eventType.rawValue)")
+
+case .templateEvent(let event):
+    // event.eventType guaranteed to be template-only:
+    // .templateCreated, .templateUpdated
+    print("Template \(event.data.name) - \(event.eventType.rawValue)")
+}
+```
 
 ## License
 
