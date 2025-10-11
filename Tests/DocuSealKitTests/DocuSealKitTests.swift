@@ -137,7 +137,7 @@ struct ClientConfigurationTests {
             .init(
                 externalID: "some-external-id",
                 userEmail: "user@example.com",
-                intergrationEmail: "saas@example.com",
+                integrationEmail: "saas@example.com",
                 templateName: "Document Processing",
                 documentURLs: ["https://www.irs.gov/pub/irs-pdf/fw9.pdf"]
             )
