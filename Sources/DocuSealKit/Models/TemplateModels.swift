@@ -25,11 +25,132 @@ public struct FieldValue: Codable, Sendable {
     /// The field name.
     public let field: String
     /// The field value.
-    public let value: String
+    public let value: FieldValueType?
 
-    public init(field: String, value: String) {
+    public init(field: String, value: FieldValueType?) {
         self.field = field
         self.value = value
+    }
+
+    // MARK: - Convenience Initializers
+
+    /// Initialize with a string value
+    public init(field: String, stringValue: String) {
+        self.field = field
+        self.value = .string(stringValue)
+    }
+
+    /// Initialize with a boolean value
+    public init(field: String, boolValue: Bool) {
+        self.field = field
+        self.value = .bool(boolValue)
+    }
+
+    /// Initialize with an integer value
+    public init(field: String, intValue: Int) {
+        self.field = field
+        self.value = .int(intValue)
+    }
+
+    /// Initialize with a double value
+    public init(field: String, doubleValue: Double) {
+        self.field = field
+        self.value = .double(doubleValue)
+    }
+
+    /// Initialize with a nil value
+    public init(field: String) {
+        self.field = field
+        self.value = nil
+    }
+}
+
+public enum FieldValueType: Codable, Sendable {
+    case string(String)
+    case bool(Bool)
+    case int(Int)
+    case double(Double)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else if let boolValue = try? container.decode(Bool.self) {
+            self = .bool(boolValue)
+        } else if let intValue = try? container.decode(Int.self) {
+            self = .int(intValue)
+        } else if let doubleValue = try? container.decode(Double.self) {
+            self = .double(doubleValue)
+        } else {
+            throw DecodingError.typeMismatch(
+                FieldValueType.self,
+                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unable to decode FieldValueType")
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        switch self {
+        case .string(let value):
+            try container.encode(value)
+        case .bool(let value):
+            try container.encode(value)
+        case .int(let value):
+            try container.encode(value)
+        case .double(let value):
+            try container.encode(value)
+        }
+    }
+
+    // MARK: - Convenience Properties
+
+    /// Returns the value as a String if it's a string type
+    public var stringValue: String? {
+        if case .string(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    /// Returns the value as a Bool if it's a bool type
+    public var boolValue: Bool? {
+        if case .bool(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    /// Returns the value as an Int if it's an int type
+    public var intValue: Int? {
+        if case .int(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    /// Returns the value as a Double if it's a double type
+    public var doubleValue: Double? {
+        if case .double(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    /// Returns a string representation of the value regardless of type
+    public var description: String {
+        switch self {
+        case .string(let value):
+            return value
+        case .bool(let value):
+            return String(value)
+        case .int(let value):
+            return String(value)
+        case .double(let value):
+            return String(value)
+        }
     }
 }
 

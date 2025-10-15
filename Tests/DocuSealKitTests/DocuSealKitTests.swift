@@ -233,7 +233,7 @@ struct ClientConfigurationTests {
         // Validate field values
         #expect(webhook.data.values?.count == 1)
         #expect(webhook.data.values?.first?.field == "First person")
-        #expect(webhook.data.values?.first?.value.contains("signature.png") == true)
+        #expect(webhook.data.values?.first?.value?.stringValue?.contains("signature.png") == true)
 
         // Validate documents
         #expect(webhook.data.documents?.count == 1)
@@ -332,8 +332,8 @@ struct ClientConfigurationTests {
         #expect(webhook.data.values?.count == 2)
         let values = webhook.data.values ?? []
         #expect(values.allSatisfy { $0.field == "Neighbor" })
-        #expect(values.first?.value.contains("initials.png") == true)
-        #expect(values.last?.value.contains("signature.png") == true)
+        #expect(values.first?.value?.stringValue?.contains("initials.png") == true)
+        #expect(values.last?.value?.stringValue?.contains("signature.png") == true)
 
         // Validate template with subfolder
         #expect(webhook.data.template?.folderName == "ACH Health/Abstract")
