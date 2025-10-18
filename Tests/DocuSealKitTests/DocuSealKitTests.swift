@@ -871,9 +871,7 @@ struct WebhookVerificationTests {
         // Should not throw any error
         try DocusealWebhookHandler.verifyWebhookSecret(
             receivedKey: "X-DocuSeal-Secret-Key",
-            receivedValue: "my-secret-value",
-            expectedKey: "X-DocuSeal-Secret-Key",
-            expectedValue: "my-secret-value"
+            expectedKey: "X-DocuSeal-Secret-Key"
         )
     }
 
@@ -882,9 +880,7 @@ struct WebhookVerificationTests {
         #expect {
             try DocusealWebhookHandler.verifyWebhookSecret(
                 receivedKey: "Wrong-Key",
-                receivedValue: "my-secret-value",
-                expectedKey: "X-DocuSeal-Secret-Key",
-                expectedValue: "my-secret-value"
+                expectedKey: "X-DocuSeal-Secret-Key"
             )
         } throws: { error in
             if let docuSealError = error as? DocuSealError,
@@ -901,9 +897,7 @@ struct WebhookVerificationTests {
         #expect {
             try DocusealWebhookHandler.verifyWebhookSecret(
                 receivedKey: "X-DocuSeal-Secret-Key",
-                receivedValue: "wrong-value",
-                expectedKey: "X-DocuSeal-Secret-Key",
-                expectedValue: "my-secret-value"
+                expectedKey: "X-DocuSeal-Secret"
             )
         } throws: { error in
             if let docuSealError = error as? DocuSealError,
@@ -920,9 +914,7 @@ struct WebhookVerificationTests {
         #expect {
             try DocusealWebhookHandler.verifyWebhookSecret(
                 receivedKey: "",
-                receivedValue: "",
-                expectedKey: "X-DocuSeal-Secret-Key",
-                expectedValue: "my-secret-value"
+                expectedKey: "X-DocuSeal-Secret-Key"
             )
         } throws: { error in
             if let docuSealError = error as? DocuSealError,

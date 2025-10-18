@@ -20,7 +20,8 @@ public struct DocuSealClient: Sendable {
     private var apiKey: String
     private let logger: Logger
     private var timeout: TimeAmount
-    private let userAgent: String = "DocuSeal Swift SDK/1.0"
+    private let userAgent: String = "github.com/thoven87/docuseal-kit Swift SDK/2.0"
+    private let estimatedContentLengthHeader: Int
 
     internal var keys: JWTKeyCollection
 
@@ -29,7 +30,8 @@ public struct DocuSealClient: Sendable {
         apiKey: String,
         httpClient: HTTPClient = HTTPClient.shared,
         logger: Logger = Logger(label: "com.docusealkit.DocuSealClient"),
-        timeout: TimeAmount = .seconds(60)
+        timeout: TimeAmount = .seconds(60),
+        estimatedContentLengthHeader: Int = 05 * 1024 * 1024 // 5MB
     ) async {
         self.baseURL = baseURL
         self.apiKey = apiKey
@@ -37,6 +39,7 @@ public struct DocuSealClient: Sendable {
         self.logger = logger
         self.timeout = timeout
         self.keys = await JWTKeyCollection().add(hmac: .init(from: apiKey), digestAlgorithm: .sha256)
+        self.estimatedContentLengthHeader = estimatedContentLengthHeader
     }
 
     // MARK: - Configuration
@@ -102,7 +105,7 @@ public struct DocuSealClient: Sendable {
     internal func executeRequest<T: Decodable>(_ request: HTTPClientRequest) async throws -> T {
         let response = try await httpClient.execute(request, timeout: timeout)
         // Try to get the expected bytes if not availbale collect upto 5mb
-        let expectedBytes = response.headers.first(name: "content-length").flatMap(Int.init) ?? 05 * 1024 * 1024
+        let expectedBytes = response.headers.first(name: "content-length").flatMap(Int.init) ?? estimatedContentLengthHeader
         guard (200...299).contains(response.status.code) else {
             let body = try await response.body.collect(upTo: expectedBytes)  // 1MB max
             let error = String(buffer: body)
