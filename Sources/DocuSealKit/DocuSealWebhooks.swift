@@ -530,14 +530,12 @@ public struct DocusealWebhookHandler {
     /// Throws DocuSealError.webhookAuthenticationError if verification fails
     public static func verifyWebhookSecret(
         receivedKey: String,
-        receivedValue: String,
-        expectedKey: String,
-        expectedValue: String
+        expectedKey: String
     ) throws {
-        guard receivedKey == expectedKey && receivedValue == expectedValue else {
+        guard receivedKey == expectedKey else {
             throw DocuSealError.webhookAuthenticationError(
                 message:
-                    "Invalid webhook credentials - received key '\(receivedKey)' with value '\(receivedValue)' does not match expected credentials"
+                    "Invalid webhook credentials - received key '\(receivedKey)' with value '\(expectedKey)' does not match expected credentials"
             )
         }
     }

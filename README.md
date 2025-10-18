@@ -16,7 +16,7 @@ Add the following to your `Package.swift` file's dependencies:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/thoven87/docuseal-kit.git", from: "1.0.0")
+    .package(url: "https://github.com/thoven87/docuseal-kit.git", from: "2.0.0")
 ]
 ```
 
@@ -231,10 +231,8 @@ DocuSeal uses key-value pairs in request headers for webhook authentication. Con
 ```swift
 // Verify webhook authenticity - throws DocuSealError.webhookAuthenticationError if invalid
 try DocusealWebhookHandler.verifyWebhookSecret(
-    receivedKey: request.headers["X-Secret-Key"]?.first ?? "",
-    receivedValue: request.headers["X-Secret-Value"]?.first ?? "",
-    expectedKey: "your-secret-key",
-    expectedValue: "your-secret-value"
+    receivedKey: request.headers["X-Secret-Value"]?.first ?? "",
+    expectedKey: "your-secret-value"
 )
 ```
 
