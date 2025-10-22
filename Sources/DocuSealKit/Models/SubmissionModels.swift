@@ -20,7 +20,7 @@ public enum DocuSealSubmissionStatus: String, Codable, Sendable {
 
 // MARK: - Submission Models
 
-public struct Submission: Codable {
+public struct Submission: Codable, Sendable {
     public let id: Int
     public let source: String
     public let submittersOrder: SubmittersOrder
@@ -98,7 +98,7 @@ public struct Submission: Codable {
     }
 }
 
-public struct SubmissionDocuments: Codable {
+public struct SubmissionDocuments: Codable, Sendable {
     public let id: Int
     public let documents: [Document]
 
@@ -110,7 +110,7 @@ public struct SubmissionDocuments: Codable {
 
 // MARK: - Submission List Response
 
-public struct SubmissionListResponse: Codable {
+public struct SubmissionListResponse: Codable, Sendable {
     public let data: [Submission]
     public let pagination: Pagination
 
@@ -122,7 +122,7 @@ public struct SubmissionListResponse: Codable {
 
 // MARK: - Submission List Query
 
-public struct SubmissionListQuery: Codable {
+public struct SubmissionListQuery: Codable, Sendable {
     /// The template ID allows you to receive only the submissions created from that specific template.
     public let templateId: Int?
     /// Filter submissions by status.
@@ -203,12 +203,12 @@ public struct SubmissionListQuery: Codable {
 
 // MARK: - Create Submission Request
 
-public enum SubmittersOrder: String, Codable {
+public enum SubmittersOrder: String, Codable, Sendable {
     case random = "random"
     case preserved = "preserved"
 }
 
-public struct CreateSubmissionRequest: Codable {
+public struct CreateSubmissionRequest: Codable, Sendable {
     /// The unique identifier of the template. Document template forms can be created via the Web UI, PDF and DOCX API, or HTML API.
     /// Example: 1000001
     public let templateId: Int
@@ -274,7 +274,7 @@ public struct CreateSubmissionRequest: Codable {
     }
 }
 
-public struct SubmissionMessage: Codable {
+public struct SubmissionMessage: Codable, Sendable {
     /// Custom signature request email subject.
     public let subject: String?
     /// Custom signature request email body. Can include the following variables: {{template.name}}, {{submitter.link}}, {{account.name}}.
@@ -286,7 +286,7 @@ public struct SubmissionMessage: Codable {
     }
 }
 
-public struct SubmissionSubmitter: Codable {
+public struct SubmissionSubmitter: Codable, Sendable {
     /// The name of the submitter.
     public let name: String?
     /// The role name or title of the submitter.
@@ -442,7 +442,7 @@ public struct SubmissionField: Codable, Sendable {
 
 // MARK: - Create Submissions From Emails Request
 
-public struct CreateSubmissionsFromEmailsRequest: Codable {
+public struct CreateSubmissionsFromEmailsRequest: Codable, Sendable {
     /// The unique identifier of the template.
     /// Example: 1000001
     public let templateId: Int
@@ -476,7 +476,7 @@ public struct CreateSubmissionsFromEmailsRequest: Codable {
 }
 
 // MARK: - Create Submission From PDF Request
-public struct CreateSubmissionFromPdfRequest: Codable {
+public struct CreateSubmissionFromPdfRequest: Codable, Sendable {
     /// Base64 encoded PDF file or public URL
     public let pdf: String
 
@@ -564,7 +564,7 @@ public struct CreateSubmissionFromPdfRequest: Codable {
 }
 
 // MARK: - Create Submission From HTML Request
-public struct CreateSubmissionFromHtmlRequest: Codable {
+public struct CreateSubmissionFromHtmlRequest: Codable, Sendable {
     /// HTML content
     public let html: String
 
@@ -646,7 +646,7 @@ public struct CreateSubmissionFromHtmlRequest: Codable {
 }
 
 // MARK: - Create Submission From DOCX Request
-public struct CreateSubmissionFromDocxRequest: Codable {
+public struct CreateSubmissionFromDocxRequest: Codable, Sendable {
     /// Base64 encoded DOCX file or public URL
     public let docx: String
 
@@ -734,7 +734,7 @@ public struct CreateSubmissionFromDocxRequest: Codable {
 }
 
 // MARK: - Enhanced Create Submission Response
-public struct CreateSubmissionResponse: Codable {
+public struct CreateSubmissionResponse: Codable, Sendable {
     /// Unique identifier of the submission
     public let id: Int
 
@@ -791,7 +791,7 @@ public struct FieldValidation: Codable, Sendable {
 }
 
 // MARK: - Query Parameters with Include Support
-public struct SubmissionQuery: Codable {
+public struct SubmissionQuery: Codable, Sendable {
     /// Include additional related data
     public let include: String?
 
@@ -810,7 +810,7 @@ public struct SubmissionQuery: Codable {
     }
 }
 
-public struct SubmissionDocumentsQuery: Codable {
+public struct SubmissionDocumentsQuery: Codable, Sendable {
     /// Include additional related data
     public let include: String?
 

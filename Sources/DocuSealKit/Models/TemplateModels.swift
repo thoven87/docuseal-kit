@@ -565,7 +565,7 @@ public struct TemplateListQuery: Codable, Sendable {
 }
 
 // MARK: - Template Query with Include Support
-public struct TemplateQuery: Codable {
+public struct TemplateQuery: Codable, Sendable {
     /// Include additional related data
     public let include: String?
 

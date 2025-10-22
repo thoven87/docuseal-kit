@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Create Template from Word DOCX
 
-public struct CreateTemplateFromDocxRequest: Codable {
+public struct CreateTemplateFromDocxRequest: Codable, Sendable {
     /// Name of the template
     /// Example: Test DOCX
     public let name: String?
@@ -46,7 +46,7 @@ public struct CreateTemplateFromDocxRequest: Codable {
     }
 }
 
-public struct TemplateDocumentRequest: Codable {
+public struct TemplateDocumentRequest: Codable, Sendable {
     /// Name of the document.
     public let name: String
     /// Base64-encoded content of the DOCX file or downloadable file URL
@@ -66,7 +66,7 @@ public struct TemplateDocumentRequest: Codable {
     }
 }
 
-public enum TemplateFieldType: String, Codable {
+public enum TemplateFieldType: String, Codable, Sendable {
     case heading = "heading"
     case text = "text"
     case signature = "signature"
@@ -86,7 +86,7 @@ public enum TemplateFieldType: String, Codable {
     case verification = "verification"
 }
 
-public struct TemplateFieldRequest: Codable {
+public struct TemplateFieldRequest: Codable, Sendable {
     /// Name of the field.
     public let name: String
     /// Type of the field (e.g., text, signature, date, initials).
@@ -131,7 +131,7 @@ public struct TemplateFieldRequest: Codable {
     }
 }
 
-public struct TemplateFieldAreaRequest: Codable {
+public struct TemplateFieldAreaRequest: Codable, Sendable {
     /// X-coordinate of the field area.
     public let x: Double
     /// Y-coordinate of the field area.
@@ -164,7 +164,7 @@ public struct TemplateFieldAreaRequest: Codable {
 
 // MARK: - Create Template from HTML
 
-public enum DocuSealPageSize: String, Codable {
+public enum DocuSealPageSize: String, Codable, Sendable {
     case letter = "Letter"
     case a0 = "A0"
     case a1 = "A1"
@@ -179,7 +179,7 @@ public enum DocuSealPageSize: String, Codable {
     case ledge = "Ledger"
 }
 
-public struct CreateTemplateFromHtmlRequest: Codable {
+public struct CreateTemplateFromHtmlRequest: Codable, Sendable {
     /// HTML template with field tags.
     ///    Example: <p>Lorem Ipsum is simply dummy text of the <text-field name="Industry" role="First Party" required="false" style="width: 80px; height: 16px; display: inline-block; margin-bottom: -4px"> </text-field> and typesetting industry</p>
     public let html: String
@@ -240,7 +240,7 @@ public struct CreateTemplateFromHtmlRequest: Codable {
     }
 }
 
-public struct HtmlDocumentRequest: Codable {
+public struct HtmlDocumentRequest: Codable, Sendable {
     /// HTML template with field tags.
     /// Example: <p>Lorem Ipsum is simply dummy text of the <text-field name="Industry" role="First Party" required="false" style="width: 80px; height: 16px; display: inline-block; margin-bottom: -4px"> </text-field> and typesetting industry</p>
     public let html: String
@@ -256,7 +256,7 @@ public struct HtmlDocumentRequest: Codable {
 
 // MARK: - Create Template from PDF
 
-public struct CreateTemplateFromPdfRequest: Codable {
+public struct CreateTemplateFromPdfRequest: Codable, Sendable {
     /// Name of the template
     /// Example: Test PDF
     public let name: String?
@@ -310,7 +310,7 @@ public struct CreateTemplateFromPdfRequest: Codable {
 
 // MARK: - Merge Templates
 
-public struct MergeTemplatesRequest: Codable {
+public struct MergeTemplatesRequest: Codable, Sendable {
     /// An array of template ids to merge into a new template.
     /// Example: [321,432]
     public let templateIds: [Int]
@@ -350,7 +350,7 @@ public struct MergeTemplatesRequest: Codable {
 
 // MARK: - Update Template
 
-public struct UpdateTemplateRequest: Codable {
+public struct UpdateTemplateRequest: Codable, Sendable {
     /// The name of the template
     /// Example: New Document Name
     public let name: String?
@@ -385,7 +385,7 @@ public struct UpdateTemplateRequest: Codable {
 
 // MARK: - Update Template Documents
 
-public struct UpdateTemplateDocumentsRequest: Codable {
+public struct UpdateTemplateDocumentsRequest: Codable, Sendable {
     /// The list of documents to add or replace in the template.
     public let documents: [UpdateTemplateDocumentRequest]
     /// Set to `true` to merge all existing and new documents into a single PDF document in the template.
@@ -401,7 +401,7 @@ public struct UpdateTemplateDocumentsRequest: Codable {
     }
 }
 
-public struct UpdateTemplateDocumentRequest: Codable {
+public struct UpdateTemplateDocumentRequest: Codable, Sendable {
     /// Document name. Random uuid will be assigned when not specified.
     /// Example: Test Template
     public let name: String?

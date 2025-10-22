@@ -9,7 +9,7 @@ import Foundation
 import NIOCore
 import NIOFoundationCompat
 
-public enum DocuSealSubmissionWebhookEventType: String, Codable {
+public enum DocuSealSubmissionWebhookEventType: String, Codable, Sendable {
     // Submission Webhooks
     case submissionCreated = "submission.created"
     case submissionArchived = "submission.archived"
@@ -17,7 +17,7 @@ public enum DocuSealSubmissionWebhookEventType: String, Codable {
     case submissionExpired = "submission.expired"
 }
 
-public enum DocuSealFormWebhookEventType: String, Codable {
+public enum DocuSealFormWebhookEventType: String, Codable, Sendable {
     // Form Webhooks
     case formViewed = "form.viewed"
     case formStarted = "form.started"
@@ -25,7 +25,7 @@ public enum DocuSealFormWebhookEventType: String, Codable {
     case formDeclined = "form.declined"
 }
 
-public enum DocuSealTemplateWebhookEventType: String, Codable {
+public enum DocuSealTemplateWebhookEventType: String, Codable, Sendable {
     // Template Webhooks
     case templateCreated = "template.created"
     case templateUpdated = "template.updated"
@@ -41,7 +41,7 @@ public enum DocuSealWebhookEventCategory {
 
 // MARK: - Base Webhook Event
 
-public struct DocuSealWebhookEvent<T: Codable, E: Codable>: Codable {
+public struct DocuSealWebhookEvent<T: Codable & Sendable, E: Codable & Sendable>: Codable {
     /// The event type.
     public let eventType: E
     /// The event timestamp.
@@ -65,7 +65,7 @@ public struct DocuSealWebhookEvent<T: Codable, E: Codable>: Codable {
 
 // MARK: - Form Webhook Data
 
-public struct DocuSealFormWebhookData: Codable {
+public struct DocuSealFormWebhookData: Codable, Sendable {
     /// The submitter's unique identifier.
     public let id: Int
     /// The unique submission identifier.
@@ -117,7 +117,7 @@ public struct DocuSealFormWebhookData: Codable {
     /// Documents
     public let documents: [Document]?
 
-    public struct Preferences: Codable {
+    public struct Preferences: Codable, Sendable {
         /// The flag indicating whether the submitter has opted to receive an email.
         public let sendEmail: Bool
         /// The flag indicating whether the submitter has opted to receive an SMS.
@@ -212,7 +212,7 @@ public struct DocuSealFormWebhookData: Codable {
     }
 }
 
-public struct DocuSealFormSubmissionInfo: Codable {
+public struct DocuSealFormSubmissionInfo: Codable, Sendable {
     /// The submission's unique identifier.
     public let id: Int
     /// The audit log PDF URL. Available only if the submission was completed by all submitters.
@@ -259,7 +259,7 @@ public struct DocuSealFormSubmissionInfo: Codable {
 //'submission.completed' event is triggered when the submission is completed by all signing parties.
 //'submission.expired' event is triggered when the submission expires.
 //'submission.archived' event is triggered when the submission is archived.
-public struct DocuSealSubmissionWebhookData: Codable {
+public struct DocuSealSubmissionWebhookData: Codable, Sendable {
     /// The submission's unique identifier.
     public let id: Int
     /// The submission archive date.
@@ -292,7 +292,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
     /// The date and time when the submission was fully completed.
     public let completedAt: Date?
 
-    public enum Source: String, Codable {
+    public enum Source: String, Codable, Sendable {
         case invite = "invite"
         case bulk = "bulk"
         case api = "api"
@@ -350,7 +350,7 @@ public struct DocuSealSubmissionWebhookData: Codable {
     }
 }
 
-public struct DocuSealWebhookSubmissionEvent: Codable {
+public struct DocuSealWebhookSubmissionEvent: Codable, Sendable {
     /// Submission event unique ID number.
     public let id: Int
     /// Unique identifier of the submitter that triggered the event.
@@ -360,7 +360,7 @@ public struct DocuSealWebhookSubmissionEvent: Codable {
     /// Date and time when the event was triggered.
     public let eventTimestamp: Date
 
-    public enum EventType: String, Codable {
+    public enum EventType: String, Codable, Sendable {
         case sendEmail = "send_email"
         case bounceEmail = "bounce_email"
         case complaintEmail = "complaint_email"
@@ -400,7 +400,7 @@ public struct DocuSealWebhookSubmissionEvent: Codable {
 /// Get template creation and update notifications using these events:
 /// 'template.created' is triggered when the template is created.
 /// 'tempate.updated' is triggered when the template is updated.
-public struct DocuSealTemplateWebhookData: Codable {
+public struct DocuSealTemplateWebhookData: Codable, Sendable {
     /// The template's unique identifier.
     public let id: Int
     /// The template's unique slug.
@@ -441,7 +441,7 @@ public struct DocuSealTemplateWebhookData: Codable {
     public let documents: [TemplateDocument]
 
     /// native, api, embed
-    public enum Source: String, Codable {
+    public enum Source: String, Codable, Sendable {
         case api
         case embed
         case native
