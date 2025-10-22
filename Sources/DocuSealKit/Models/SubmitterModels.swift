@@ -179,7 +179,7 @@ public struct Submitter: Codable, Sendable {
 
 // MARK: - Submitter List Response
 
-public struct SubmitterListResponse: Codable {
+public struct SubmitterListResponse: Codable, Sendable {
     public let data: [Submitter]
     public let pagination: Pagination
 
@@ -190,7 +190,7 @@ public struct SubmitterListResponse: Codable {
 }
 
 // MARK: - Submitter Query with Include Support
-public struct SubmitterQuery: Codable {
+public struct SubmitterQuery: Codable, Sendable {
     /// Include additional related data
     public let include: String?
 
@@ -211,7 +211,7 @@ public struct SubmitterQuery: Codable {
 
 // MARK: - Submitter List Query
 
-public struct SubmitterListQuery: Codable {
+public struct SubmitterListQuery: Codable, Sendable {
     /// The submission ID allows you to receive only the submitters related to that specific submission.
     public let submissionId: Int?
     /// Filter submitters on name, email or phone partial match.
@@ -296,7 +296,7 @@ public struct SubmitterListQuery: Codable {
 
 // MARK: - Update Submitter Request
 
-public struct UpdateSubmitterRequest: Codable {
+public struct UpdateSubmitterRequest: Codable, Sendable {
     /// The name of the submitter.
     public let name: String?
     /// The email address of the submitter.
