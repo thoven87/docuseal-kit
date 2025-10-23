@@ -254,9 +254,9 @@ public struct EventRecord: Codable, Sendable {
 
 public struct ArchiveResponse: Codable, Sendable {
     public let id: Int
-    public let archivedAt: Date
+    public let archivedAt: Date?
 
-    public init(id: Int, archivedAt: Date) {
+    public init(id: Int, archivedAt: Date?) {
         self.id = id
         self.archivedAt = archivedAt
     }
