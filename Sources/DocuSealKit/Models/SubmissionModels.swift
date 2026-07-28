@@ -262,6 +262,9 @@ public struct CreateSubmissionRequest: Codable, Sendable {
     public let message: SubmissionMessage?
     /// The list of submitters for the submission.
     public let submitters: [SubmissionSubmitter]
+    /// Dynamic content variables for template documents (e.g. `["patient_name": "John"]`).
+    /// Values can be strings, numbers, arrays, objects, or HTML used in dynamic DOCX/HTML templates.
+    public let variables: [String: String]?
 
     public init(
         templateId: Int,
@@ -273,7 +276,8 @@ public struct CreateSubmissionRequest: Codable, Sendable {
         replyTo: String? = nil,
         expireAt: String? = nil,
         message: SubmissionMessage? = nil,
-        submitters: [SubmissionSubmitter]
+        submitters: [SubmissionSubmitter],
+        variables: [String: String]? = nil
     ) {
         self.templateId = templateId
         self.sendEmail = sendEmail
@@ -285,6 +289,7 @@ public struct CreateSubmissionRequest: Codable, Sendable {
         self.expireAt = expireAt
         self.message = message
         self.submitters = submitters
+        self.variables = variables
     }
 
     enum CodingKeys: String, CodingKey {
@@ -298,6 +303,7 @@ public struct CreateSubmissionRequest: Codable, Sendable {
         case expireAt = "expire_at"
         case message
         case submitters
+        case variables
     }
 }
 
@@ -352,8 +358,12 @@ public struct SubmissionSubmitter: Codable, Sendable {
     public let roles: [String]?
     /// The order of the submitter in the workflow (e.g., 0 for the first signer, 1 for the second, etc.). Use the same order number to create order groups.
     public let order: Int?
-    /// Set to `true` to require phone 2FA verification via a one-time code sent to the phone number in order to access the documents.
+    /// Set to `true` to require phone 2FA verification via a one-time code sent to the phone number.
     public let requirePhone2FA: Bool?
+    /// Set to `true` to require email 2FA verification via a one-time code sent to the email address.
+    public let requireEmail2FA: Bool?
+    /// Set the role name of the previous party that should invite this party via email.
+    public let inviteBy: String?
 
     public init(
         name: String? = nil,
@@ -372,7 +382,9 @@ public struct SubmissionSubmitter: Codable, Sendable {
         fields: [SubmissionField]? = nil,
         roles: [String]? = nil,
         order: Int? = nil,
-        requirePhone2FA: Bool? = nil
+        requirePhone2FA: Bool? = nil,
+        requireEmail2FA: Bool? = nil,
+        inviteBy: String? = nil
     ) {
         self.name = name
         self.role = role
@@ -391,6 +403,8 @@ public struct SubmissionSubmitter: Codable, Sendable {
         self.roles = roles
         self.order = order
         self.requirePhone2FA = requirePhone2FA
+        self.requireEmail2FA = requireEmail2FA
+        self.inviteBy = inviteBy
     }
 
     enum CodingKeys: String, CodingKey {
@@ -411,6 +425,8 @@ public struct SubmissionSubmitter: Codable, Sendable {
         case roles
         case order
         case requirePhone2FA = "require_phone_2fa"
+        case requireEmail2FA = "require_email_2fa"
+        case inviteBy = "invite_by"
     }
 }
 
@@ -481,17 +497,21 @@ public struct CreateSubmissionsFromEmailsRequest: Codable, Sendable {
     public let sendEmail: Bool
     /// Message to include
     public let message: SubmissionMessage?
+    /// Expiration date/time in DocuSeal format: `"YYYY-MM-DD HH:mm:ss UTC"`.
+    public let expireAt: String?
 
     public init(
         templateId: Int,
         emails: String,
         sendEmail: Bool = true,
-        message: SubmissionMessage? = nil
+        message: SubmissionMessage? = nil,
+        expireAt: String? = nil
     ) {
         self.templateId = templateId
         self.emails = emails
         self.sendEmail = sendEmail
         self.message = message
+        self.expireAt = expireAt
     }
 
     enum CodingKeys: String, CodingKey {
@@ -499,6 +519,7 @@ public struct CreateSubmissionsFromEmailsRequest: Codable, Sendable {
         case emails
         case sendEmail = "send_email"
         case message
+        case expireAt = "expire_at"
     }
 }
 

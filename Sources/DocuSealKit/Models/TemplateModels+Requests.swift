@@ -84,6 +84,8 @@ public enum TemplateFieldType: String, Codable, Sendable {
     case payment = "payment"
     case phone = "phone"
     case verification = "verification"
+    case kba = "kba"
+    case strikethrough = "strikethrough"
 }
 
 public struct TemplateFieldRequest: Codable, Sendable {
@@ -173,10 +175,9 @@ public enum DocuSealPageSize: String, Codable, Sendable {
     case a4 = "A4"
     case a5 = "A5"
     case a6 = "A6"
-    case a10 = "A10"
     case legal = "Legal"
     case tabloid = "Tabloid"
-    case ledge = "Ledger"
+    case ledger = "Ledger"
 }
 
 public struct CreateTemplateFromHtmlRequest: Codable, Sendable {
@@ -324,19 +325,23 @@ public struct MergeTemplatesRequest: Codable, Sendable {
     /// An array of submitter role names to be used in the merged template.
     /// Example: ["Agent","Customer"]
     public let roles: [String]?
+    /// Set to `true` to make the merged template available via a shared link.
+    public let sharedLink: Bool?
 
     public init(
         templateIds: [Int],
         name: String? = nil,
         folderName: String? = nil,
         externalId: String? = nil,
-        roles: [String]? = nil
+        roles: [String]? = nil,
+        sharedLink: Bool? = nil
     ) {
         self.templateIds = templateIds
         self.name = name
         self.folderName = folderName
         self.externalId = externalId
         self.roles = roles
+        self.sharedLink = sharedLink
     }
 
     enum CodingKeys: String, CodingKey {
@@ -345,6 +350,7 @@ public struct MergeTemplatesRequest: Codable, Sendable {
         case folderName = "folder_name"
         case externalId = "external_id"
         case roles
+        case sharedLink = "shared_link"
     }
 }
 
