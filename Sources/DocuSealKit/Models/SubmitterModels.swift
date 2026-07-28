@@ -327,6 +327,10 @@ public struct UpdateSubmitterRequest: Codable, Sendable {
     public let message: SubmissionMessage?
     /// A list of configurations for template document form fields.
     public let fields: [SubmissionField]?
+    /// Set to `true` to require phone 2FA verification.
+    public let requirePhone2FA: Bool?
+    /// Set to `true` to require email 2FA verification.
+    public let requireEmail2FA: Bool?
 
     public init(
         name: String? = nil,
@@ -341,7 +345,9 @@ public struct UpdateSubmitterRequest: Codable, Sendable {
         completed: Bool? = nil,
         metadata: [String: String]? = nil,
         message: SubmissionMessage? = nil,
-        fields: [SubmissionField]? = nil
+        fields: [SubmissionField]? = nil,
+        requirePhone2FA: Bool? = nil,
+        requireEmail2FA: Bool? = nil
     ) {
         self.name = name
         self.email = email
@@ -356,6 +362,8 @@ public struct UpdateSubmitterRequest: Codable, Sendable {
         self.metadata = metadata
         self.message = message
         self.fields = fields
+        self.requirePhone2FA = requirePhone2FA
+        self.requireEmail2FA = requireEmail2FA
     }
 
     enum CodingKeys: String, CodingKey {
@@ -372,5 +380,7 @@ public struct UpdateSubmitterRequest: Codable, Sendable {
         case metadata
         case message
         case fields
+        case requirePhone2FA = "require_phone_2fa"
+        case requireEmail2FA = "require_email_2fa"
     }
 }
