@@ -31,7 +31,7 @@ public struct DocuSealClient: Sendable {
         httpClient: HTTPClient = HTTPClient.shared,
         logger: Logger = Logger(label: "com.docusealkit.DocuSealClient"),
         timeout: TimeAmount = .seconds(60),
-        estimatedContentLengthHeader: Int = 05 * 1024 * 1024 // 5MB
+        estimatedContentLengthHeader: Int = 05 * 1024 * 1024  // 5MB
     ) async {
         self.baseURL = baseURL
         self.apiKey = apiKey

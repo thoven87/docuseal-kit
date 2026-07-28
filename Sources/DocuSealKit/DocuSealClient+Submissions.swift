@@ -92,6 +92,18 @@ extension DocuSealClient {
         return try await executeRequest(httpRequest)
     }
 
+    /// Update a submission — change name, expiration date, or archived state.
+    /// `PUT /submissions/{id}`
+    ///
+    /// - Parameters:
+    ///   - id: DocuSeal submission ID.
+    ///   - request: Fields to update. Omitted (nil) fields are left unchanged.
+    /// - Returns: The updated `Submission`.
+    public func updateSubmission(id: Int, request: UpdateSubmissionRequest) async throws -> Submission {
+        let httpRequest = try makeRequest(path: "/submissions/\(id)", method: .PUT, body: request)
+        return try await executeRequest(httpRequest)
+    }
+
     /// Archive a submission
     public func archiveSubmission(id: Int) async throws -> ArchiveResponse {
         let request = makeRequest(path: "/submissions/\(id)", method: .DELETE)

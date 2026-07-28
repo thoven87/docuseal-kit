@@ -40,7 +40,7 @@ public struct DocuSealSubmitterEntityModel: Codable, Sendable {
         self.metadata = metadata
         self.externalId = externalId
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case name
         case role

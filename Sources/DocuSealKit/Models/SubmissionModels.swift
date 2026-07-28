@@ -7,6 +7,33 @@
 
 import Foundation
 
+// MARK: - Update submission
+
+/// Request body for `PUT /submissions/{id}`.
+/// All fields are optional — only the ones you include are updated.
+public struct UpdateSubmissionRequest: Encodable, Sendable {
+    /// New name for the submission.
+    public let name: String?
+    /// New expiration date/time as a string in DocuSeal format: `"YYYY-MM-DD HH:mm:ss UTC"`.
+    /// Pass `nil` to leave the expiration unchanged; the field is omitted from the JSON.
+    /// To explicitly *remove* an existing expiration, use the separate `RemoveExpirationRequest`.
+    public let expireAt: String?
+    /// Pass `true` to archive; `false` to unarchive.
+    public let archived: Bool?
+
+    public init(name: String? = nil, expireAt: String? = nil, archived: Bool? = nil) {
+        self.name = name
+        self.expireAt = expireAt
+        self.archived = archived
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case expireAt = "expire_at"
+        case archived
+    }
+}
+
 public enum DocuSealSubmissionStatus: String, Codable, Sendable {
     /// The submission has been fully completed by all signing parties
     case completed
