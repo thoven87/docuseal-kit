@@ -58,8 +58,8 @@ public struct Submitter: Codable, Sendable {
     /// Example: john.doe@example.com
     public let email: String
     /// The unique slug of the submitter.
-    /// Optional: not present in all webhook contexts (e.g. submission webhook submitter arrays).
-    public let slug: String?
+    /// Used to construct the signing link: https://docuseal.com/s/{slug}
+    public let slug: String
     /// The date and time when the signing request was sent to the submitter.
     public let sentAt: Date?
     /// The date and time when the submitter opened the signing form.
@@ -106,7 +106,7 @@ public struct Submitter: Codable, Sendable {
         submissionId: Int,
         uuid: String,
         email: String,
-        slug: String?,
+        slug: String,
         sentAt: Date?,
         openedAt: Date?,
         completedAt: Date?,
