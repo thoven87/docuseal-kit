@@ -368,17 +368,23 @@ public struct UpdateTemplateRequest: Codable, Sendable {
     public let roles: [String]?
     /// Set `false` to unarchive template.
     public let archived: Bool?
+    /// Your application-specific unique string key to identify this template within your app.
+    /// Update this on every new signing session so `submission.created` webhooks carry
+    /// the current session's identifier and can be matched 1:1 without heuristics.
+    public let externalId: String?
 
     public init(
         name: String? = nil,
         folderName: String? = nil,
         roles: [String]? = nil,
-        archived: Bool? = nil
+        archived: Bool? = nil,
+        externalId: String? = nil
     ) {
         self.name = name
         self.folderName = folderName
         self.roles = roles
         self.archived = archived
+        self.externalId = externalId
     }
 
     enum CodingKeys: String, CodingKey {
@@ -386,6 +392,7 @@ public struct UpdateTemplateRequest: Codable, Sendable {
         case folderName = "folder_name"
         case roles
         case archived
+        case externalId = "external_id"
     }
 }
 

@@ -169,6 +169,11 @@ public struct Pagination: Codable, Sendable {
 public struct TemplateReference: Codable, Sendable {
     /// The template's unique identifier.
     public let id: Int
+    /// The template's unique slug — present in both form and submission webhook payloads.
+    /// Matches `esign_sessions.docuseal_slug` (stored at session-creation time from
+    /// `Template.slug`). Use this as the primary recovery key when
+    /// `data.externalId` is absent from the form webhook.
+    public let slug: String?
     /// The template's name.
     public let name: String
     /// Your application-specific unique string key to identify template within your app.
@@ -180,6 +185,7 @@ public struct TemplateReference: Codable, Sendable {
 
     public init(
         id: Int,
+        slug: String?,
         name: String,
         externalId: String?,
         folderName: String?,
@@ -187,6 +193,7 @@ public struct TemplateReference: Codable, Sendable {
         updatedAt: Date
     ) {
         self.id = id
+        self.slug = slug
         self.name = name
         self.externalId = externalId
         self.folderName = folderName
@@ -196,6 +203,7 @@ public struct TemplateReference: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case slug
         case name
         case externalId = "external_id"
         case folderName = "folder_name"
@@ -234,12 +242,25 @@ public struct EventRecord: Codable, Sendable {
     public let submitterId: Int
     public let eventType: String
     public let eventTimestamp: Date
+    /// Additional event-specific data (e.g. `{"status": "undelivered", "error_code": "30005"}` for `fail_sms`).
+    /// Decoded best-effort as a string-keyed dictionary; nil when absent or when values are non-string.
+    public let data: [String: String]?
 
-    public init(id: Int, submitterId: Int, eventType: String, eventTimestamp: Date) {
+    public init(id: Int, submitterId: Int, eventType: String, eventTimestamp: Date, data: [String: String]? = nil) {
         self.id = id
         self.submitterId = submitterId
         self.eventType = eventType
         self.eventTimestamp = eventTimestamp
+        self.data = data
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        submitterId = try container.decode(Int.self, forKey: .submitterId)
+        eventType = try container.decode(String.self, forKey: .eventType)
+        eventTimestamp = try container.decode(Date.self, forKey: .eventTimestamp)
+        data = try? container.decodeIfPresent([String: String].self, forKey: .data)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -247,6 +268,7 @@ public struct EventRecord: Codable, Sendable {
         case submitterId = "submitter_id"
         case eventType = "event_type"
         case eventTimestamp = "event_timestamp"
+        case data
     }
 }
 
@@ -287,6 +309,8 @@ public struct Template: Codable, Sendable {
     public let externalId: String?
     public let author: UserReference?
     public let documents: [TemplateDocument]
+    /// Whether the template is accessible via a shared link.
+    public let sharedLink: Bool?
 
     public init(
         id: Int,
@@ -305,7 +329,8 @@ public struct Template: Codable, Sendable {
         folderName: String?,
         externalId: String?,
         author: UserReference?,
-        documents: [TemplateDocument]
+        documents: [TemplateDocument],
+        sharedLink: Bool? = nil
     ) {
         self.id = id
         self.slug = slug
@@ -324,6 +349,7 @@ public struct Template: Codable, Sendable {
         self.externalId = externalId
         self.author = author
         self.documents = documents
+        self.sharedLink = sharedLink
     }
 
     enum CodingKeys: String, CodingKey {
@@ -344,6 +370,7 @@ public struct Template: Codable, Sendable {
         case externalId = "external_id"
         case author
         case documents
+        case sharedLink = "shared_link"
     }
 }
 
@@ -506,6 +533,8 @@ public struct TemplateListQuery: Codable, Sendable {
     public let folder: String?
     /// Get only archived templates instead of active ones.
     public let archived: Bool?
+    /// List templates shared with test mode.
+    public let shared: Bool?
     /// The number of templates to return. Default value is 10. Maximum value is 100.
     public let limit: Int?
     /// The unique identifier of the template to start the list from. It allows you to receive only templates with id greater than the specified value. Pass ID value from the `pagination.next` response to load the next batch of templates.
@@ -519,6 +548,7 @@ public struct TemplateListQuery: Codable, Sendable {
         externalId: String? = nil,
         folder: String? = nil,
         archived: Bool? = nil,
+        shared: Bool? = nil,
         limit: Int? = nil,
         after: Int? = nil,
         before: Int? = nil
@@ -528,6 +558,7 @@ public struct TemplateListQuery: Codable, Sendable {
         self.externalId = externalId
         self.folder = folder
         self.archived = archived
+        self.shared = shared
         self.limit = limit
         self.after = after
         self.before = before
@@ -539,6 +570,7 @@ public struct TemplateListQuery: Codable, Sendable {
         case externalId = "external_id"
         case folder
         case archived
+        case shared
         case limit
         case after
         case before
@@ -555,6 +587,9 @@ public struct TemplateListQuery: Codable, Sendable {
         if let folder = folder { items.append(URLQueryItem(name: "folder", value: folder)) }
         if let archived = archived {
             items.append(URLQueryItem(name: "archived", value: String(archived)))
+        }
+        if let shared = shared {
+            items.append(URLQueryItem(name: "shared", value: String(shared)))
         }
         if let limit = limit { items.append(URLQueryItem(name: "limit", value: String(limit))) }
         if let after = after { items.append(URLQueryItem(name: "after", value: String(after))) }
