@@ -29,7 +29,31 @@ public enum DocuSealTemplateWebhookEventType: String, Codable, Sendable {
     // Template Webhooks
     case templateCreated = "template.created"
     case templateUpdated = "template.updated"
+    case templateArchived = "template.archived"
 }
+
+// MARK: - Template Archive Webhook
+
+/// Minimal data payload for `template.archived` events.
+/// DocuSeal only sends `{id, archived_at}` for archive events, not the full template.
+public struct DocuSealTemplateArchiveResult: Codable, Sendable {
+    public let id: Int
+    public let archivedAt: Date?
+
+    public init(id: Int, archivedAt: Date?) {
+        self.id = id
+        self.archivedAt = archivedAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case archivedAt = "archived_at"
+    }
+}
+
+public typealias DocuSealTemplateArchiveWebhookEvent = DocuSealWebhookEvent<
+    DocuSealTemplateArchiveResult, DocuSealTemplateWebhookEventType
+>
 
 // MARK: - Webhook Event Categories
 
@@ -37,6 +61,8 @@ public enum DocuSealWebhookEventCategory {
     case submissionEvent(DocuSealSubmissionWebhookEvent)
     case formEvent(DocuSealFormWebhookEvent)
     case templateEvent(DocuSealTemplateWebhookEvent)
+    /// `template.archived` — data is minimal (`id` + `archived_at` only, not the full template).
+    case templateArchiveEvent(DocuSealTemplateArchiveWebhookEvent)
 }
 
 // MARK: - Base Webhook Event
@@ -122,10 +148,13 @@ public struct DocuSealFormWebhookData: Codable, Sendable {
         public let sendEmail: Bool
         /// The flag indicating whether the submitter has opted to receive an SMS.
         public let sendSms: Bool
+        /// The email message template UUID.
+        public let emailMessageUuid: String?
 
         enum CodingKeys: String, CodingKey {
             case sendEmail = "send_email"
             case sendSms = "send_sms"
+            case emailMessageUuid = "email_message_uuid"
         }
     }
 
@@ -209,6 +238,8 @@ public struct DocuSealFormWebhookData: Codable, Sendable {
         case auditLogUrl = "audit_log_url"
         case submissionUrl = "submission_url"
         case documents
+        // application_key intentionally omitted — fully deprecated and removed from DocuSeal server
+        // (was a legacy alias for external_id). Always null in current payloads.
     }
 }
 
@@ -262,8 +293,15 @@ public struct DocuSealFormSubmissionInfo: Codable, Sendable {
 public struct DocuSealSubmissionWebhookData: Codable, Sendable {
     /// The submission's unique identifier.
     public let id: Int
+    /// The submission's unique alphanumeric slug (e.g. "AeYbVdQ4gayVeg").
+    /// Appears in the submission URL: `https://docuseal.com/e/{slug}`.
+    public let slug: String?
+    /// The submission display name (null when not set).
+    public let name: String?
     /// The submission archive date.
     public let archivedAt: Date?
+    /// The date the submission expires.
+    public let expireAt: Date?
     /// The submission creation date.
     public let createdAt: Date?
     /// The submission update date.
@@ -276,6 +314,8 @@ public struct DocuSealSubmissionWebhookData: Codable, Sendable {
     public let submittersOrder: SubmittersOrder?
     /// Audit log file URL.
     public let auditLogUrl: String?
+    /// The combined document URL (all signed documents merged into one PDF).
+    public let combinedDocumentUrl: String?
     /// The list of submitters for the submission.
     public let submitters: [Submitter]?
     /// Base template details.
@@ -302,12 +342,16 @@ public struct DocuSealSubmissionWebhookData: Codable, Sendable {
 
     public init(
         id: Int,
+        slug: String? = nil,
+        name: String? = nil,
         archivedAt: Date?,
+        expireAt: Date? = nil,
         createdAt: Date,
         updatedAt: Date,
         source: Source,
         submittersOrder: SubmittersOrder,
         auditLogUrl: String?,
+        combinedDocumentUrl: String? = nil,
         submitters: [Submitter],
         template: TemplateReference?,
         createdByUser: UserReference?,
@@ -317,12 +361,16 @@ public struct DocuSealSubmissionWebhookData: Codable, Sendable {
         completedAt: Date?
     ) {
         self.id = id
+        self.slug = slug
+        self.name = name
         self.archivedAt = archivedAt
+        self.expireAt = expireAt
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.source = source
         self.submittersOrder = submittersOrder
         self.auditLogUrl = auditLogUrl
+        self.combinedDocumentUrl = combinedDocumentUrl
         self.submitters = submitters
         self.template = template
         self.createdByUser = createdByUser
@@ -334,12 +382,16 @@ public struct DocuSealSubmissionWebhookData: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case slug
+        case name
         case archivedAt = "archived_at"
+        case expireAt = "expire_at"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case source
         case submittersOrder = "submitters_order"
         case auditLogUrl = "audit_log_url"
+        case combinedDocumentUrl = "combined_document_url"
         case submitters
         case template
         case createdByUser = "created_by_user"
@@ -359,6 +411,9 @@ public struct DocuSealWebhookSubmissionEvent: Codable, Sendable {
     public let eventType: EventType
     /// Date and time when the event was triggered.
     public let eventTimestamp: Date
+    /// Additional event-specific data (e.g. `{"status": "undelivered", "error_code": "30005"}` for `fail_sms`).
+    /// Decoded best-effort as a string-keyed dictionary; nil when absent or when values are non-string.
+    public let data: [String: String]?
 
     public enum EventType: String, Codable, Sendable {
         case sendEmail = "send_email"
@@ -366,6 +421,7 @@ public struct DocuSealWebhookSubmissionEvent: Codable, Sendable {
         case complaintEmail = "complaint_email"
         case sendReminderEmail = "send_reminder_email"
         case sendSms = "send_sms"
+        case failSms = "fail_sms"
         case send2faSms = "send_2fa_sms"
         case openEmail = "open_email"
         case clickEmail = "click_email"
@@ -381,11 +437,24 @@ public struct DocuSealWebhookSubmissionEvent: Codable, Sendable {
         case apiCompleteForm = "api_complete_form"
     }
 
-    public init(id: Int, submitterId: Int, eventType: EventType, eventTimestamp: Date) {
+    public init(id: Int, submitterId: Int, eventType: EventType, eventTimestamp: Date, data: [String: String]? = nil) {
         self.id = id
         self.submitterId = submitterId
         self.eventType = eventType
         self.eventTimestamp = eventTimestamp
+        self.data = data
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        submitterId = try container.decode(Int.self, forKey: .submitterId)
+        eventType = try container.decode(EventType.self, forKey: .eventType)
+        eventTimestamp = try container.decode(Date.self, forKey: .eventTimestamp)
+        // Decode data best-effort: handles string-value maps ({"status":"undelivered"}).
+        // Falls back to nil when values are non-string (nested objects, numbers, etc.).
+        // We never act on this field in Brebo — it is for observability only.
+        data = try? container.decodeIfPresent([String: String].self, forKey: .data)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -393,6 +462,7 @@ public struct DocuSealWebhookSubmissionEvent: Codable, Sendable {
         case submitterId = "submitter_id"
         case eventType = "event_type"
         case eventTimestamp = "event_timestamp"
+        case data
     }
 }
 
@@ -437,6 +507,8 @@ public struct DocuSealTemplateWebhookData: Codable, Sendable {
     public let folderName: String?
     /// Folder name where the template is placed.
     public let author: UserReference
+    /// Whether the template has a shared signing link enabled.
+    public let sharedLink: Bool?
     /// List of documents attached to the template.
     public let documents: [TemplateDocument]
 
@@ -466,6 +538,7 @@ public struct DocuSealTemplateWebhookData: Codable, Sendable {
         applicationKey: String?,
         folderName: String?,
         author: UserReference,
+        sharedLink: Bool?,
         documents: [TemplateDocument]
     ) {
         self.id = id
@@ -486,6 +559,7 @@ public struct DocuSealTemplateWebhookData: Codable, Sendable {
         self.applicationKey = applicationKey
         self.folderName = folderName
         self.author = author
+        self.sharedLink = sharedLink
         self.documents = documents
     }
 
@@ -508,6 +582,7 @@ public struct DocuSealTemplateWebhookData: Codable, Sendable {
         case applicationKey = "application_key"
         case folderName = "folder_name"
         case author
+        case sharedLink = "shared_link"
         case documents
     }
 }
@@ -571,6 +646,10 @@ public struct DocusealWebhookHandler {
         case "template.created", "template.updated":
             let event = try decoder.decode(DocuSealTemplateWebhookEvent.self, from: buffer)
             return .templateEvent(event)
+
+        case "template.archived":
+            let event = try decoder.decode(DocuSealTemplateArchiveWebhookEvent.self, from: buffer)
+            return .templateArchiveEvent(event)
 
         default:
             throw DocuSealError.decodingError(
